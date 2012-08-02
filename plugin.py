@@ -10,6 +10,7 @@ import sqlite3
 import urllib2
 from BeautifulSoup import BeautifulSoup
 import string
+import re
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -127,6 +128,81 @@ class CFB(callbacks.Plugin):
         irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item) for item in teams], " | ")))
         
     cfbteams = wrap(cfbteams, [('somethingWithoutSpaces')])
+
+    def _lookupTeam(self, optteam):
+        db_filename = self.registryValue('dbLocation')
+        
+        if not os.path.exists(db_filename):
+            self.log.error("ERROR: I could not find: %s" % db_filename)
+            return
+            
+        conn = sqlite3.connect(db_filename)
+        cursor = conn.cursor()
+        query = "select tid from cfb where team LIKE ?"
+        cursor.execute(query, (optteam,))
+        row = cursor.fetchone()
+        
+        if row is None:
+            conn.close()
+            return "0"
+        else:
+            conn.close()
+            return (str(row[0]))
+    
+    def cfbschedule(self, irc, msg, args, optteam):
+        """[team]
+        Display the schedule/results for team.
+        """
+        
+        lookupteam = self._lookupTeam(optteam)
+        
+        if lookupteam == "0":
+            irc.reply("I could not find a schedule for: %s" % optteam)
+            return
+        
+        url = 'http://www.cbssports.com/collegefootball/teams/schedule/%s/' % lookupteam
+
+        req = urllib2.Request(url)
+        html = (urllib2.urlopen(req)).read()
+        html = html.replace('&amp;','&').replace(';','')
+    
+        soup = BeautifulSoup(html)
+        
+        if soup.find('table', attrs={'class':'data stacked'}).find('tr', attrs={'class':'title'}).find('td'):
+            title = soup.find('table', attrs={'class':'data stacked'}).find('tr', attrs={'class':'title'}).find('td')
+        else:
+            irc.reply("Something broke with schedules. Did formatting change?")
+            return
+
+        div = soup.find('div', attrs={'id':'layoutTeamsPage'}) # must use this div first since there is an identical table.
+        table = div.find('table', attrs={'class':'data', 'width':'100%'})
+        rows = table.findAll('tr', attrs={'class':re.compile('^row[1|2]')})
+
+        append_list = []
+        
+        for row in rows:
+            date = row.find('td')
+            team = date.findNext('td').find('a')
+            time = team.findNext('td')
+            
+            if team.text.startswith('@'): # underline home
+                team = team.text
+            else:
+                team = ircutils.underline(team.text)
+        
+            if time.find('span'): # span has score time. empty otherwise.
+                time = time.find('span').string
+                append_list.append(date.text + " - " + ircutils.bold(team) + " (" + time + ")")
+            else:
+                time = time.string
+                append_list.append(date.text + " - " + ircutils.bold(team))
+
+        descstring = string.join([item for item in append_list], " | ")
+        output = "{0} :: {1}".format(ircutils.bold(title.text), descstring)
+        
+        irc.reply(output)
+        
+    cfbschedule = wrap(cfbschedule, [('text')])
 
 Class = CFB
 
