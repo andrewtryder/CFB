@@ -12,6 +12,7 @@ from BeautifulSoup import BeautifulSoup
 import string
 import re
 import collections
+from itertools import groupby, izip, count
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -27,6 +28,11 @@ class CFB(callbacks.Plugin):
     """Add the help for "@plugin help CFB" here
     This should describe *how* to use this plugin."""
     threaded = True
+    
+    def _batch(self, iterable, size):
+        c = count()
+        for k, g in groupby(iterable, lambda x:c.next()//size):
+            yield g
     
     def _translateTeam(self, db, column, optteam):
         db_filename = self.registryValue('dbLocation')
@@ -202,6 +208,55 @@ class CFB(callbacks.Plugin):
         """
         
     cfbstandings = wrap(cfbstandings, [('somethingWithoutSpaces')])
+    
+    
+    def cfbrankings(self, irc, msg, args, optpoll):
+        """[ap|usatoday|bcs]
+        Display this week's poll.
+        """
+        
+        validpoll = ['ap', 'usatoday', 'bcs']
+        
+        optpoll = optpoll.lower()
+        
+        if optpoll not in validpoll:
+            irc.reply("Poll must be one of: %s" % validpoll)
+            return
+        
+        if optpoll == "ap":
+            url = 'http://m.espn.go.com/ncf/rankings?pollId=1&wjb=' # AP
+        if optpoll == "usatoday":
+            url = 'http://m.espn.go.com/ncf/rankings?pollId=2&wjb=' # USAT
+        if optpoll == "bcs":
+            url = 'http://m.espn.go.com/ncf/rankings?pollId=3&wjb=' # BCS
+    
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+        
+        if "No rankings available." in html:
+            irc.reply("No rankings available.")
+            return
+
+        html = html.replace('class="ind alt','class="ind')
+
+        soup = BeautifulSoup(html)
+        rows = soup.find('table', attrs={'class':'table'}).findAll('tr')[1:] # skip header row
+
+        append_list = []
+
+        for row in rows:
+            rank = row.find('td')
+            team = rank.findNext('td')
+            append_list.append(str(rank.getText()) + ". " + str(ircutils.bold(team.getText())))
+    
+        descstring = string.join([item for item in append_list], " | ") 
+        irc.reply(descstring)
+    
+    cfbrankings = wrap(cfbrankings, [('somethingWithoutSpaces')])    
 
     
     def cfbteamleaders(self, irc, msg, args, opttype, optteam):
