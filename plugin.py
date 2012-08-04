@@ -11,6 +11,7 @@ import urllib2
 from BeautifulSoup import BeautifulSoup
 import string
 import re
+import collections
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -149,6 +150,114 @@ class CFB(callbacks.Plugin):
             conn.close()
             return (str(row[0]))
     
+    def cfbteaminfo(self, irc, msg, args, optteam):
+        """[team]
+        Display basic info/stats on a team
+        """
+        
+        lookupteam = self._lookupTeam(optteam)
+        
+        if lookupteam == "0":
+            irc.reply("I could not find a schedule for: %s" % optteam)
+            return
+        
+        url = 'http://www.cbssports.com/collegefootball/teams/page/%s/' % lookupteam
+
+        try:        
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open %s" % url)
+            return
+            
+        html = html.replace('&amp;','&').replace(';','')
+
+        soup = BeautifulSoup(html)
+        div = soup.find('div', attrs={'class':'pageTitle team'})
+
+        name = div.find('div', attrs={'class':'name'}).find('h1')
+        record = div.find('div', attrs={'class':re.compile('^record')})
+        table = div.find('div', attrs={'class':'stats'}).find('table', attrs={'class':'data'})
+        rows = table.findAll('tr')
+
+        rushingOff = rows[1].findAll('td')[1]
+        rushingDef = rows[1].findAll('td')[2]
+        passingOff = rows[2].findAll('td')[1]
+        passingDef = rows[2].findAll('td')[2]
+        overallOff = rows[3].findAll('td')[1]
+        overallDef = rows[3].findAll('td')[2]
+
+        output = "{0} :: {1} - Rushing: o: {2} d: {3}  Passing: o: {4} d: {5}  Overall: o: {6} d: {7}".format(\
+            ircutils.underline(name.text), record.text, rushingOff.text, rushingDef.text,\
+            passingOff.text, passingDef.text, overallOff.text, overallDef.text)
+            
+        irc.reply(output)
+        
+    cfbteaminfo = wrap(cfbteaminfo, [('text')])
+    
+    
+    def cfbstandings(self, irc, msg, args, optconf):
+        """[conf]
+        Display conference standings.
+        """
+        
+    cfbstandings = wrap(cfbstandings, [('somethingWithoutSpaces')])
+
+    
+    def cfbteamleaders(self, irc, msg, args, opttype, optteam):
+        """<passing|rushing|receiving|touchdowns> [team] 
+        Display the top four leaders in team stats.
+        """
+        
+        validtypes = ['passing', 'rushing', 'receving', 'touchdowns']
+        
+        if opttype not in validtypes:
+            irc.reply("type must be one of: %s" % [validtypes])
+            return
+        
+        lookupteam = self._lookupTeam(optteam)
+        
+        if lookupteam == "0":
+            irc.reply("I could not find a schedule for: %s" % optteam)
+            return
+        
+        opttype = opttype.upper()
+        
+        if opttype == "RUSHING":
+            url = 'http://www.cbssports.com/collegefootball/teams/stats/%s/%s?&_1:col_1=4' % (lookupteam, opttype)
+        else:
+            url = 'http://www.cbssports.com/collegefootball/teams/stats/%s/%s' % (lookupteam, opttype)
+
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to remove: %s" % url)
+            return
+            
+        html = html.replace('&amp;','&').replace(';','')
+    
+        soup = BeautifulSoup(html)
+        table = soup.find('div', attrs={'id':'layoutTeamsPage'}).find('table', attrs={'class':'data'})
+        title = table.find('tr', attrs={'class':'title'}).find('td') 
+        headers = table.find('tr', attrs={'class':'label'}).findAll('td')
+        rows = table.findAll('tr', attrs={'class':re.compile('row[1|2]')})[0:5]
+
+        object_list = []
+
+        for row in rows:
+            tds = row.findAll('td')
+            d = collections.OrderedDict() # start the dict per row, append each into that row. one player is one row.
+            for i,td in enumerate(tds):
+                d[str(headers[i].getText())] = str(td.getText())
+            object_list.append(d)
+        
+        for each in object_list:
+            irc.reply(each)
+    
+    cfbteamleaders = wrap(cfbteamleaders, [('somethingWithoutSpaces'), ('text')])
+        
     def cfbschedule(self, irc, msg, args, optteam):
         """[team]
         Display the schedule/results for team.
@@ -162,8 +271,13 @@ class CFB(callbacks.Plugin):
         
         url = 'http://www.cbssports.com/collegefootball/teams/schedule/%s/' % lookupteam
 
-        req = urllib2.Request(url)
-        html = (urllib2.urlopen(req)).read()
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
         html = html.replace('&amp;','&').replace(';','')
     
         soup = BeautifulSoup(html)
