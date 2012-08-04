@@ -257,8 +257,53 @@ class CFB(callbacks.Plugin):
             irc.reply(output)
 
     cfbstandings = wrap(cfbstandings, [('somethingWithoutSpaces')])
+
+
+    def cfbpowerrankings(self, irc, msg, args):
+        """
+        Display this week's CFB Power Rankings.
+        """
+        
+        url = 'http://espn.go.com/college-football/powerrankings'
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+            html = html.replace("evenrow", "oddrow")
+        except:
+            irc.reply("Failed to fetch: %s" % url)
+            return
+
+        soup = BeautifulSoup(html)
+        updated = soup.find('div', attrs={'class':'date floatleft'}).text.replace('Updated:','- ')
+        table = soup.find('table', attrs={'class': 'tablehead'})
+        prdate = soup.find('h1', attrs={'class':'h2'})
+        t1 = table.findAll('tr', attrs={'class': re.compile('[even|odd]row')})[0:25]
+
+        object_list = []
+        
+        for row in t1:
+            rowrank = row.find('td')
+            rowteam = row.find('div', attrs={'style': re.compile('^padding.*')}).findAll('a')[1]
+            rowrecord = row.find('span', attrs={'class': 'pr-record'})
+            rowlastweek = row.find('span', attrs={'class': 'pr-last'}) 
+
+            d = collections.OrderedDict()
+            d['rank'] = str(rowrank.text)
+            d['team'] = str(rowteam.renderContents())
+            d['record'] = str(rowrecord.getText()).strip()
+            d['lastweek'] = str(rowlastweek.getText()).strip()
+            object_list.append(d)
+
+        if prdate:
+            irc.reply(ircutils.mircColor(prdate.text, 'blue') + " " + updated)
+
+        for N in self._batch(object_list, 8):
+            irc.reply(' '.join(str(str(n['rank']) + "." + " " + ircutils.bold(n['team'])) + " (" + n['lastweek'] + ")" for n in N))
+        
+    cfbpowerrankings = wrap(cfbpowerrankings)
     
-    
+        
     def cfbrankings(self, irc, msg, args, optpoll):
         """[ap|usatoday|bcs]
         Display this week's poll.
