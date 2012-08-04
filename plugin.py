@@ -145,13 +145,21 @@ class CFB(callbacks.Plugin):
             
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
-        query = "select tid from cfb where team LIKE ?"
+        query = "select tid from cfb where nn LIKE ?"
         cursor.execute(query, (optteam,))
         row = cursor.fetchone()
         
-        if row is None:
-            conn.close()
-            return "0"
+        if row is None: # look at nicknames first, then teams
+            query = "select tid from cfb where team LIKE ?"
+            cursor.execute(query, (optteam,))
+            row = cursor.fetchone()
+            
+            if row is None:
+                conn.close()
+                return "0"
+            else:
+                conn.close()
+                return (str(row[0]))      
         else:
             conn.close()
             return (str(row[0]))
