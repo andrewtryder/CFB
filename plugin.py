@@ -33,25 +33,8 @@ class CFB(callbacks.Plugin):
         c = count()
         for k, g in groupby(iterable, lambda x:c.next()//size):
             yield g
-    
-    def _translateTeam(self, db, column, optteam):
-        db_filename = self.registryValue('dbLocation')
         
-        if not os.path.exists(db_filename):
-            self.log.error("ERROR: I could not find: %s" % db_filename)
-            return
-            
-        conn = sqlite3.connect(db_filename)
-        cursor = conn.cursor()
-        query = "select %s from cfb where %s='%s'" % (db, column, optteam)
-        cursor.execute(query)
-        row = cursor.fetchone()
-
-        cursor.close()            
-
-        return (str(row[0]))
-        
-    def _validteams(self, conf=None):
+    def _validteams(self, optconf):
         """Returns a list of valid teams for input verification."""
         db_filename = self.registryValue('dbLocation')
         
@@ -61,7 +44,7 @@ class CFB(callbacks.Plugin):
             
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
-        cursor.execute("select team from cfb where conf=?", (conf,))        
+        cursor.execute("select team from cfb where conf=?", (optconf,))        
         teamlist = []
         
         for row in cursor.fetchall():
@@ -94,9 +77,25 @@ class CFB(callbacks.Plugin):
         cursor.close()
         
         return teamlist
+
+    def _confEid(self, optconf):
+        """Lookup conf (shortname) eID."""
+        
+        db_filename = self.registryValue('dbLocation')
+        
+        if not os.path.exists(db_filename):
+            self.log.error("ERROR: I could not find: %s" % db_filename)
+            return
+        
+        conn = sqlite3.connect(db_filename)
+        cursor = conn.cursor()
+        cursor.execute("select eid from confs where short=?", (optconf,))
+        row = cursor.fetchone()
+        cursor.close() 
+        
+        return (str(row[0])) 
     
     def _translateConf(self, optconf):
-        # conf is validated previously, so no error checking.
         db_filename = self.registryValue('dbLocation')
         
         if not os.path.exists(db_filename):
@@ -110,31 +109,6 @@ class CFB(callbacks.Plugin):
         cursor.close()            
 
         return (str(row[0])) 
-            
-    def cfbconferences(self, irc, msg, args):
-        """ .  """
-        
-        conferences = self._validconfs()
-        irc.reply("Valid conferences are: %s" % (string.join([ircutils.bold(item) for item in conferences], " | ")))
-        
-    cfbconferences = wrap(cfbconferences)
-
-    def cfbteams(self, irc, msg, args, optconf):
-        """[conference]
-        Display valid teams in a specific conference. 
-        """
-        
-        if optconf not in self._validconfs():
-            irc.reply("Invalid conf. Must be one of: %s" % self._validconfs())
-            return
-        
-        fullconf = self._translateConf(optconf)
-        
-        teams = self._validteams(conf=fullconf)
-                
-        irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item) for item in teams], " | ")))
-        
-    cfbteams = wrap(cfbteams, [('somethingWithoutSpaces')])
 
     def _lookupTeam(self, optteam):
         db_filename = self.registryValue('dbLocation')
@@ -163,6 +137,36 @@ class CFB(callbacks.Plugin):
         else:
             conn.close()
             return (str(row[0]))
+
+    ######################
+    # public functions   #        
+    ######################
+    
+    def cfbconferences(self, irc, msg, args):
+        """Show valid conferences."""
+
+        conferences = self._validconfs()
+        irc.reply("Valid conferences are: %s" % (string.join([ircutils.bold(item) for item in conferences], " | ")))
+        
+    cfbconferences = wrap(cfbconferences)
+
+
+    def cfbteams(self, irc, msg, args, optconf):
+        """[conference]
+        Display valid teams in a specific conference. 
+        """
+        
+        if optconf not in self._validconfs():
+            irc.reply("Invalid conf. Must be one of: %s" % self._validconfs())
+            return
+        
+        fullconf = self._translateConf(optconf) # needs to be lowercase, which this will return
+        teams = self._validteams(fullconf)
+                
+        irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item.title()) for item in teams], " | "))) # title because all entries are lc. 
+        
+    cfbteams = wrap(cfbteams, [('somethingWithoutSpaces')])
+    
     
     def cfbteaminfo(self, irc, msg, args, optteam):
         """[team]
@@ -215,6 +219,43 @@ class CFB(callbacks.Plugin):
         Display conference standings.
         """
         
+        if optconf not in self._validconfs():
+            irc.reply("Invalid conf. Must be one of: %s" % self._validconfs())
+            return
+        
+        eid = self._confEid(optconf)
+        
+        url = 'http://m.espn.go.com/ncf/standings?groupId=%s&y=1&wjb=' % eid
+        
+        self.log.info(url)
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+
+        html = html.replace('class="ind alt', 'class="ind').replace(';', '')
+
+        soup = BeautifulSoup(html)
+        table = soup.find('table', attrs={'class':'table'})
+        rows = table.findAll('tr')
+
+        new_data = collections.defaultdict(list)
+
+        for row in rows:
+            if not row.find('td', attrs={'class':'sec row nw'}):
+                team = row.find('td', attrs={'width':'52%'})
+                confwl = team.findNext('td')
+                ovalwl = confwl.findNext('td')
+                div = row.findPrevious('td', attrs={'class':'sec row nw', 'width':'52%'})
+                new_data[str(div.getText())].append(str(team.getText() + " " + confwl.getText() + " (" + ovalwl.getText() + ")")) #setdefault method.
+
+        for i,j in new_data.iteritems(): # for each in the confs. 
+            output = "{0} :: {1}".format(i, string.join([item for item in j], " | "))
+            irc.reply(output)
+
     cfbstandings = wrap(cfbstandings, [('somethingWithoutSpaces')])
     
     
@@ -321,6 +362,7 @@ class CFB(callbacks.Plugin):
     
     cfbteamleaders = wrap(cfbteamleaders, [('somethingWithoutSpaces'), ('text')])
         
+
     def cfbschedule(self, irc, msg, args, optteam):
         """[team]
         Display the schedule/results for team.
