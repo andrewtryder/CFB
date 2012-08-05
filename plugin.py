@@ -257,6 +257,54 @@ class CFB(callbacks.Plugin):
             irc.reply(output)
 
     cfbstandings = wrap(cfbstandings, [('somethingWithoutSpaces')])
+    
+    def cfbweeklyleaders(self, irc, msg, args):
+        """
+        Display CFB weekly leaders.
+        """
+        
+        url = 'http://espn.go.com/college-football/weekly'
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+    
+        html = html.replace('tr class="evenrow', 'tr class="oddrow')
+
+        soup = BeautifulSoup(html)
+        title = soup.find('h1', attrs={'class':'h2'}) 
+        tables = soup.findAll('table', attrs={'class':'tablehead'}) 
+
+        new_data = collections.defaultdict(list)
+
+        for table in tables:
+            rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*')})[0:3] # top 3 only. List can be long. 
+            for j,row in enumerate(rows): 
+                stat = row.findPrevious('tr', attrs={'class':'stathead'})
+                colhead = row.findPrevious('tr', attrs={'class':'colhead'}).findAll('td')
+                statnames = row.findAll('td')
+
+                del statnames[3], colhead[3] # game is always 4th. delete this. 
+        
+                for i,statname in enumerate(statnames):            
+                    appendString = str(ircutils.bold(colhead[i].text)) + ": " + str(statname.text) # prep string to add into the list.
+            
+                    if i == len(statnames)-1 and not j == len(rows)-1: # last in each.
+                        new_data[str(stat.getText())].append(appendString + " |")  
+                    else:
+                        new_data[str(stat.getText())].append(appendString)
+                
+        if title:
+            irc.reply(ircutils.mircColor(title.getText(), 'blue'))
+        
+        for i,j in new_data.iteritems():
+            output = "{0} :: {1}".format(ircutils.underline(i), string.join([item for item in j], " "))
+            irc.reply(output)
+        
+    cfbweeklyleaders = wrap(cfbweeklyleaders)
 
 
     def cfbpowerrankings(self, irc, msg, args):
