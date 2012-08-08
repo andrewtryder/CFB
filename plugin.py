@@ -214,6 +214,49 @@ class CFB(callbacks.Plugin):
     cfbteaminfo = wrap(cfbteaminfo, [('text')])
     
     
+    def cfbbowls(self, irc, msg, args, optyear, optbowl):
+        """[year] [bowl name]
+        Display bowl game result. Requires year and bowl name. Ex: 1982 Sugar or 1984 Rose
+        """
+        
+        optbowl = optbowl.lower().replace('bowl','').strip()
+        
+        url = 'http://www.sports-reference.com/cfb/years/%s-bowls.html' % optyear
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        soup = BeautifulSoup(html)
+        table = soup.find('table', attrs={'id':'bowls'})
+        rows = table.findAll('tr')[1:]
+       
+        new_data = collections.defaultdict(list)
+
+        for row in rows:
+            date = row.find('td')
+            bowl = date.findNext('td')
+            t1 = bowl.findNext('td')
+            t1score = t1.findNext('td')
+            t2 = t1score.findNext('td')
+            t2score = t2.findNext('td')
+            loc = t2score.findNext('td')
+            new_data[str(bowl.getText().replace(' Bowl','').lower())].append(str(bowl.getText() + " :: " + t1.getText() + " " +\
+                t1score.getText() + " - " + t2.getText() + " " + t2score.getText()))
+
+        output = new_data.get(optbowl, None)
+
+        if output is None:
+            irc.reply(new_data.keys())
+        else:
+            irc.reply(output)
+    
+    cfbbowls = wrap(cfbbowls, [('somethingWithoutSpaces'), ('text')])
+    
+    
     def cfbstandings(self, irc, msg, args, optconf):
         """[conf]
         Display conference standings.
