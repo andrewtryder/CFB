@@ -13,6 +13,7 @@ import string
 import re
 import collections
 from itertools import groupby, izip, count
+import datetime
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -219,6 +220,12 @@ class CFB(callbacks.Plugin):
         Display bowl game result. Requires year and bowl name. Ex: 1982 Sugar or 1984 Rose
         """
         
+        currentYear = datetime.datetime.now().strftime("%Y")
+        
+        if optyear < 1900 or optyear > currentYear:
+            irc.reply("Year must be between 1900 and %s" % currentYear)
+            return
+                        
         optbowl = optbowl.lower().replace('bowl','').strip()
         
         url = 'http://www.sports-reference.com/cfb/years/%s-bowls.html' % optyear
@@ -244,15 +251,15 @@ class CFB(callbacks.Plugin):
             t2 = t1score.findNext('td')
             t2score = t2.findNext('td')
             loc = t2score.findNext('td')
-            new_data[str(bowl.getText().replace(' Bowl','').lower())].append(str(bowl.getText() + " :: " + t1.getText() + " " +\
+            new_data[str(bowl.getText().replace(' Bowl','').lower())].append(str(loc.getText() + " :: " + t1.getText() + " " +\
                 t1score.getText() + " - " + t2.getText() + " " + t2score.getText()))
 
         output = new_data.get(optbowl, None)
 
         if output is None:
-            irc.reply(new_data.keys())
+            irc.reply("Error: Bowl must be one of: %s" % new_data.keys())
         else:
-            irc.reply(output)
+            irc.reply(" ".join(output))
     
     cfbbowls = wrap(cfbbowls, [('somethingWithoutSpaces'), ('text')])
     
