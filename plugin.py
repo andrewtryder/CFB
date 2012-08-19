@@ -14,6 +14,7 @@ import re
 import collections
 from itertools import groupby, izip, count
 import datetime
+from random import choice
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -157,6 +158,8 @@ class CFB(callbacks.Plugin):
         Display valid teams in a specific conference. 
         """
         
+        optconf = optconf.upper()
+        
         if optconf not in self._validconfs():
             irc.reply("Invalid conf. Must be one of: %s" % self._validconfs())
             return
@@ -167,6 +170,37 @@ class CFB(callbacks.Plugin):
         irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item.title()) for item in teams], " | "))) # title because all entries are lc. 
         
     cfbteams = wrap(cfbteams, [('somethingWithoutSpaces')])
+    
+    def spurrier(self, irc, msg, args):
+        """Display a random Steve Spurrier quote."""
+    
+        url = 'https://docs.google.com/document/pub?id=1oKceGxP6ReL9CAeVrLhdtF_DnGC9K7HY4Sn5JsKlrlQ'
+
+        try:
+            headers={'User-Agent':' Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'}
+            req = urllib2.Request(url, None, headers)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        soup = BeautifulSoup(html)
+        quotes = soup.findAll('p', attrs={'class':re.compile('^c.*?')})
+
+        append_list = []
+
+        for quote in quotes:
+            quote = quote.getText().replace(u'&#39;',"'").replace(u'&quot;','"') #.encode('ascii', 'replace')
+            #quote = quote.replace('&#39;',"'").replace('&quot;','\"') #.replace(u'\u2019', '\'')
+            #quote = quote.text.encode('ascii', 'ignore')
+            if len(quote) > 1: # we have empties here because of the regex above. Only way to discard empty quotes here.
+                append_list.append(quote)
+
+
+        output = choice(append_list)
+        irc.reply(output)
+    
+    spurrier = wrap(spurrier)
     
     
     def cfbteaminfo(self, irc, msg, args, optteam):
@@ -268,6 +302,8 @@ class CFB(callbacks.Plugin):
         """[conf]
         Display conference standings.
         """
+        
+        optconf = optconf.upper()
         
         if optconf not in self._validconfs():
             irc.reply("Invalid conf. Must be one of: %s" % self._validconfs())
@@ -457,6 +493,8 @@ class CFB(callbacks.Plugin):
         """
         
         validtypes = ['passing', 'rushing', 'receving', 'touchdowns']
+        
+        opttype = opttype.lower()
         
         if opttype not in validtypes:
             irc.reply("type must be one of: %s" % [validtypes])
