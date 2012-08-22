@@ -15,6 +15,7 @@ import collections
 from itertools import groupby, izip, count
 import datetime
 from random import choice
+import json
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -35,6 +36,23 @@ class CFB(callbacks.Plugin):
         c = count()
         for k, g in groupby(iterable, lambda x:c.next()//size):
             yield g
+
+    def _shortenUrl(self, url):
+        posturi = "https://www.googleapis.com/urlshortener/v1/url"
+        headers = {'Content-Type' : 'application/json'}
+        data = {'longUrl' : url}
+
+        data = json.dumps(data)
+        request = urllib2.Request(posturi,data,headers)
+        response = urllib2.urlopen(request)
+        response_data = response.read()
+        shorturi = json.loads(response_data)['id']
+        return shorturi
+
+    def _b64decode(self, string):
+        """Returns base64 encoded string."""
+        import base64
+        return base64.b64decode(string)
         
     def _validteams(self, optconf):
         """Returns a list of valid teams for input verification."""
@@ -170,6 +188,87 @@ class CFB(callbacks.Plugin):
         irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item.title()) for item in teams], " | "))) # title because all entries are lc. 
         
     cfbteams = wrap(cfbteams, [('somethingWithoutSpaces')])
+
+
+    def cfbnews(self, irc, msg, args, optnumber):
+        """<#>
+        Display latest CFB news. If # is given (min 1, max 10), will display more. 
+        """
+        
+        url = self._b64decode('aHR0cDovL20uZXNwbi5nby5jb20vbmNmL25ld3M/JndqYj0=')
+
+        if optnumber:
+            if optnumber.isdigit() and 1 <= int(optnumber) <= 10:
+                optnumber = optnumber
+            else:
+                optnumber = '4'
+        else:
+            optnumber = '4'
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        html = html.replace('class="ind alt"','class="ind"')
+
+        soup = BeautifulSoup(html)
+        divs = soup.findAll('div', attrs={'class':'ind', 'style':'white-space: nowrap;'})
+        
+        append_list = []
+        
+        for div in divs[0:int(optnumber)]:
+            link = div.find('a')['href']
+            linkText = div.find('a')
+            append_list.append(ircutils.bold(linkText.getText()) + " " + self._shortenUrl(link))
+        
+        for each in append_list:
+            irc.reply(each)
+    
+    cfbnews = wrap(cfbnews, [optional('somethingWithoutSpaces')])    
+
+    
+    def cfbanalysis(self, irc, msg, args, optnumber):
+        """<#>
+        Display latest CFB analysis. If # is given (min 1, max 10), will display more. 
+        """
+        
+        url = self._b64decode('aHR0cDovL20uZXNwbi5nby5jb20vbmNmL2FuYWx5c2lzPyZ3amI9')
+
+        if optnumber:
+            if optnumber.isdigit() and 1 <= int(optnumber) <= 10:
+                optnumber = optnumber
+            else:
+                optnumber = '4'
+        else:
+            optnumber = '4'
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        html = html.replace('class="ind alt"','class="ind"')
+
+        soup = BeautifulSoup(html)
+        divs = soup.findAll('div', attrs={'class':'ind', 'style':'white-space: nowrap;'})
+        
+        append_list = []
+        
+        for div in divs[0:int(optnumber)]:
+            link = div.find('a')['href']
+            linkText = div.find('a')
+            append_list.append(ircutils.bold(linkText.getText()) + " " + self._shortenUrl(link))
+        
+        for each in append_list:
+            irc.reply(each)
+    
+    cfbanalysis = wrap(cfbanalysis, [optional('somethingWithoutSpaces')])
+    
     
     def spurrier(self, irc, msg, args):
         """Display a random Steve Spurrier quote."""
