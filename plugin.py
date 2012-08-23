@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###
 # Copyright (c) 2012, spline
 # All rights reserved.
@@ -14,6 +15,7 @@ import re
 import collections
 from itertools import groupby, izip, count
 import datetime
+import time
 from random import choice
 import json
 
@@ -48,6 +50,18 @@ class CFB(callbacks.Plugin):
         response_data = response.read()
         shorturi = json.loads(response_data)['id']
         return shorturi
+
+    def _daysSince(self, string):
+        a = datetime.date.today()
+        b = datetime.datetime.strptime(string, "%B %d, %Y")
+        b = b.date()
+        delta = b - a
+        delta = abs(delta.days)
+        return delta
+    
+    def _shortDateFormat(self, string):
+        """Return a short date string from a full date string."""
+        return time.strftime('%m/%d', time.strptime(string, '%B %d, %Y'))
 
     def _b64decode(self, string):
         """Returns base64 encoded string."""
@@ -227,8 +241,55 @@ class CFB(callbacks.Plugin):
         for each in append_list:
             irc.reply(each)
     
-    cfbnews = wrap(cfbnews, [optional('somethingWithoutSpaces')])    
+    cfbnews = wrap(cfbnews, [optional('somethingWithoutSpaces')])
+    
+    
+    def cfbarrests(self, irc, msg, args):
+        """
+        Display the last 5 CFB arrests.
+        """    
+    
+        url = self._b64decode('aHR0cDovL2FycmVzdG5hdGlvbi5jb20vY2F0ZWdvcnkvY29sbGVnZS1mb290YmFsbC8=')
 
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        html = html.replace('&nbsp;',' ').replace('&#8217;','’')
+
+        soup = BeautifulSoup(html)
+        lastDate = soup.findAll('span', attrs={'class':'time'})[0] 
+        divs = soup.findAll('div', attrs={'class':'entry'})
+
+        append_list = []
+
+        for div in divs:
+            title = div.find('h2')
+            datet = div.find('span', attrs={'class':'time'})
+            datet = self._shortDateFormat(str(datet.getText()))
+            arrestedFor = div.find('strong', text=re.compile('Team:')).findParent('p')    
+            if arrestedFor:
+                matches = re.search(r'<strong>Team:.*?</strong>(.*?)<br />', arrestedFor.renderContents(), re.I|re.S|re.M)
+                if matches:
+                    college = matches.group(1).replace('(College Football)','').strip()
+                else:
+                    college = "None"
+            else:
+                college = "None"
+            
+            append_list.append(ircutils.bold(datet) + " :: " + title.getText() + " - " + college) # finally add it all
+        
+        daysSince = self._daysSince(str(lastDate.getText()))
+        irc.reply("{0} days since last CFB arrest".format(ircutils.mircColor(daysSince, 'red')))
+        
+        for each in append_list[0:6]:
+            irc.reply(each)
+
+    cfbarrests = wrap(cfbarrests)
+    
     
     def cfbanalysis(self, irc, msg, args, optnumber):
         """<#>
