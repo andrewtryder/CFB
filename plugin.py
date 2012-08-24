@@ -270,9 +270,9 @@ class CFB(callbacks.Plugin):
             title = div.find('h2')
             datet = div.find('span', attrs={'class':'time'})
             datet = self._shortDateFormat(str(datet.getText()))
-            arrestedFor = div.find('strong', text=re.compile('Team:')).findParent('p')    
+            arrestedFor = div.find('strong', text=re.compile('Team:'))    
             if arrestedFor:
-                matches = re.search(r'<strong>Team:.*?</strong>(.*?)<br />', arrestedFor.renderContents(), re.I|re.S|re.M)
+                matches = re.search(r'<strong>Team:.*?</strong>(.*?)<br />', arrestedFor.findParent('p').renderContents(), re.I|re.S|re.M)
                 if matches:
                     college = matches.group(1).replace('(College Football)','').strip()
                 else:
