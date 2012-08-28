@@ -673,7 +673,6 @@ class CFB(callbacks.Plugin):
         else:
             url = 'http://www.cbssports.com/collegefootball/teams/stats/%s/%s' % (lookupteam, opttype)
 
-
         try:
             req = urllib2.Request(url)
             html = (urllib2.urlopen(req)).read()
@@ -702,7 +701,73 @@ class CFB(callbacks.Plugin):
             irc.reply(each)
     
     cfbteamleaders = wrap(cfbteamleaders, [('somethingWithoutSpaces'), ('text')])
+
+
+    def cfbroster(self, irc, msg, args, optlist, optteam):
+        """<--position LS|TE|RB|WR|QB|FB|P|DB|K|LB|OL|DL|T|S|DE|G|C|NT> [team]
+        Display the roster for a CFB team. With optional --position POS, it will only display people listed at that position.
+        """
         
+        position = None
+        for (option, arg) in optlist:
+            if option == 'position':
+                position = arg.upper()
+                
+        validpositions = ['LS', 'TE', 'RB', 'WR', 'QB', 'FB', 'P', 'DB', 'K', 'LB', 'OL', 'DL', 'T', 'S', 'DE', 'G', 'C', 'NT']
+
+        if position is not None:
+            if position not in validpositions:
+                irc.reply('Position must be one of: %s' % validpositions)
+                return
+
+        lookupteam = self._lookupTeam(optteam)
+        
+        if lookupteam == "0":
+            irc.reply("I could not find the team: %s" % optteam)
+            return
+
+        url = 'http://www.cbssports.com/collegefootball/teams/roster/%s/' % lookupteam
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        html = html.replace('&nbsp;','')
+
+        soup = BeautifulSoup(html)
+        div = soup.find('div', attrs={'class':'spacer10 clearBoth'})
+        table = div.findNext('table', attrs={'class':'data', 'width':'100%'})
+        rows = table.findAll('tr', attrs={'class':re.compile('^row1$|^row2$')})
+
+        players = collections.defaultdict(list)
+
+        for row in rows:
+            tds = row.findAll('td')
+            pNumber = tds[0]
+            pName = tds[1]
+            pPos = tds[2]
+            pString = str("#" + pNumber.getText() + " " + pName.getText())
+            players[str(pPos.getText())].append(pString)
+    
+        output_list = []
+        
+        if position is not None:
+            output = players.get(position, None)
+            if output:
+                irc.reply("{0} Roster at {1} :: {2}".format(ircutils.mircColor(optteam.title(), 'red'), ircutils.bold(position), " ".join(output)))
+            else:
+                irc.reply("I did not find anyone at {0} on {1}".format(ircutils.bold(position), ircutils.bold(optteam.title())))
+        else:
+            for i,x in players.iteritems():
+                output_list.append("{0} :: {1}".format(i, " ".join(x)))
+        
+            irc.reply("{0} Roster :: {1}".format(ircutils.mircColor(optteam.title(), 'red'), " | ".join(output_list)))
+    
+    cfbroster = wrap(cfbroster, [(getopts({'position':'somethingWithoutSpaces'})), ('text')])        
+                
 
     def cfbschedule(self, irc, msg, args, optteam):
         """[team]
