@@ -758,7 +758,7 @@ class CFB(callbacks.Plugin):
                 append_list.append(date.text + " - " + ircutils.bold(team))
 
         descstring = string.join([item for item in append_list], " | ")
-        output = "{0} :: {1}".format(ircutils.bold(title.text), descstring)
+        output = "{0} for {1} :: {2}".format(title.text, ircutils.bold(optteam.title()), descstring)
         
         irc.reply(output)
         
