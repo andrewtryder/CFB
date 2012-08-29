@@ -767,7 +767,50 @@ class CFB(callbacks.Plugin):
             irc.reply("{0} Roster :: {1}".format(ircutils.mircColor(optteam.title(), 'red'), " | ".join(output_list)))
     
     cfbroster = wrap(cfbroster, [(getopts({'position':'somethingWithoutSpaces'})), ('text')])        
-                
+    
+    
+    def cfbheisman(self, irc, msg, args):
+        """
+        Display poll results on Heisman voting.
+        """
+
+        url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvaGVpc21hbi8=')
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+                       
+        html = html.replace('&nbsp;','')
+
+        soup = BeautifulSoup(html)
+        div = soup.find('div', attrs={'class':'hw-module'})
+        h2 = div.find('h2').getText()
+        date = div.find('div', attrs={'class':'hw-module-date'}).getText()
+        table = div.find('table', attrs={'class':'tablehead'})
+        rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*?|^evenrow.*?')})
+
+        append_list = []
+
+        for row in rows:
+            tds = row.findAll('td')
+            player = tds[0]
+            position = tds[1]
+            school = tds[2]
+            points = tds[-1]
+            appendString = str(ircutils.bold(player.getText()) + " " + school.getText() + " (" +points.getText() + ")")
+            append_list.append(appendString)
+    
+        
+        descstring = string.join([item for item in append_list], " | ")
+        output = "{0} on {1} :: {2}".format(ircutils.mircColor(h2, 'red'), ircutils.bold(date), descstring)
+
+        irc.reply(output)
+    
+    cfbheisman = wrap(cfbheisman)    
+
 
     def cfbschedule(self, irc, msg, args, optteam):
         """[team]
