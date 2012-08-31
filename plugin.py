@@ -809,7 +809,60 @@ class CFB(callbacks.Plugin):
 
         irc.reply(output)
     
-    cfbheisman = wrap(cfbheisman)    
+    cfbheisman = wrap(cfbheisman)
+    
+    
+    def cfbstats(self, irc, msg, args, optstat):
+        """[stat]
+        Display individual leaders for a specific CFB stat.
+        """
+        
+        validcategories = { 
+                    'rushing':'rushing', 'receving':'receving', 'touchdowns':'scoring/sort/totalTouchdowns',
+                    'points':'scoring/sort/totalPoints', 'qbr':'passing/sort/collegeQuarterbackRating',
+                    'comppct':'passing/sort/completionPct', 'sacks':'defense/sort/sacks', 
+                    'int':'defense/sort/interceptions', 'fgs':'kicking/sort/fieldGoalsMade', 
+                    'punting':'punting', 'kickreturnyds':'returning/sort/kickReturnYards',
+                    'puntreturnyards':'returning/sort/puntReturnYards', 'passing':'passing'
+                    }
+        
+        if optstat not in validcategories:
+            irc.reply("Invalid stat/category. Must be one of: %s" % validcategories.keys())
+            return
+
+        url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvc3RhdGlzdGljcy9wbGF5ZXIvXy9zdGF0Lw==') + '%s' % validcategories[optstat]
+
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        html = html.replace('&nbsp;','')
+
+        soup = BeautifulSoup(html)
+        table = soup.find('table', attrs={'class':'tablehead'})
+        header = table.find('tr', attrs={'class':'colhead'})
+        rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*?|^evenrow.*?')})[0:10]
+
+        append_list = []
+
+        for row in rows:
+            tds = row.findAll('td')
+            rank = tds[0]
+            player = tds[1]
+            team = tds[2]
+            stat = row.find('td', attrs={'class':'sortcell'})
+            appendString = str(ircutils.bold(player.getText()) + " (" + team.getText() + ") " + stat.getText())
+            append_list.append(appendString)
+        
+        descstring = string.join([item for item in append_list], " | ")
+        output = "Leaders for {0} :: {1}".format(ircutils.mircColor(optstat, 'red'), descstring)
+        
+        irc.reply(output)
+    
+    cfbstats = wrap(cfbstats, [('somethingWithoutSpaces')])
 
 
     def cfbschedule(self, irc, msg, args, optteam):
