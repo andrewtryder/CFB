@@ -144,21 +144,26 @@ class CFB(callbacks.Plugin):
 
         return (str(row[0])) 
 
-    def _lookupTeam(self, optteam):
+    def _lookupTeam(self, optteam, opttable=None):
         db_filename = self.registryValue('dbLocation')
         
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
             return
-            
+        
+        if not opttable: # tid is the default
+            opttable = 'tid'
+        
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
-        query = "select tid from cfb where nn LIKE ?"
+        query = "select %s from cfb where nn LIKE ?" % opttable
+        self.log.info(query)
         cursor.execute(query, (optteam,))
         row = cursor.fetchone()
         
         if row is None: # look at nicknames first, then teams
-            query = "select tid from cfb where team LIKE ?"
+            query = "select %s from cfb where team LIKE ?" % opttable
+            self.log.info(query)
             cursor.execute(query, (optteam,))
             row = cursor.fetchone()
             
@@ -361,6 +366,55 @@ class CFB(callbacks.Plugin):
         irc.reply(output)
     
     spurrier = wrap(spurrier)
+    
+    
+    def cfbinjury(self, irc, msg, args, optteam):
+        """[team]
+        Display injury information for team.
+        """
+        
+        lookupteam = self._lookupTeam(optteam, opttable='usat')
+        
+        if lookupteam == "0":
+            irc.reply("I could not find a schedule for: %s" % optteam)
+            return
+        
+        url = self._b64decode('aHR0cDovL3Nwb3J0c2RpcmVjdC51c2F0b2RheS5jb20vZm9vdGJhbGwvbmNhYWYtdGVhbXMuYXNweD9wYWdlPS9kYXRhL25jYWFmL3RlYW1zLw==') + 'team%s.html' % lookupteam
+        
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+            
+        html = html.replace('&#039; ','-').replace('&amp;','&')
+
+        soup = BeautifulSoup(html)
+
+        teamName = soup.find('div', attrs={'class':'sdi-title-page-who'})
+        div = soup.find('div', attrs={'class':'sdi-so injuries-showhide'})
+        table = div.find('table', attrs={'class':'sdi-data-wide'})
+
+        if table.find('td', text="No injuries to report."):
+            injReport = "No injuries to report."
+        else:
+            injuries = table.findAll('tr', attrs={'valign':'top'})
+            if len(injuries) < 1:
+                injReport = "No injuries to report."
+            else:    
+                injReport = []
+                for injury in injuries:
+                    tds = injury.findAll('td')
+                    player = tds[0]
+                    status = tds[3]
+                    appendText = str(player.getText() + " " + status.getText())
+                    injReport.append(appendText)
+        
+        output = "{0} injury report :: {1}".format(ircutils.bold(teamName.getText()), injReport)
+        irc.reply(output)
+        
+    cfbinjury = wrap(cfbinjury, [('text')])
     
     
     def cfbteaminfo(self, irc, msg, args, optteam):
