@@ -16,7 +16,6 @@ import collections
 from itertools import groupby, izip, count
 import datetime
 import time
-from random import choice
 import json
 
 import supybot.utils as utils
@@ -337,7 +336,11 @@ class CFB(callbacks.Plugin):
     
     
     def spurrier(self, irc, msg, args):
-        """Display a random Steve Spurrier quote."""
+        """
+        Display a random Steve Spurrier quote.
+        """
+        
+        from random import choice
     
         url = 'https://docs.google.com/document/pub?id=1oKceGxP6ReL9CAeVrLhdtF_DnGC9K7HY4Sn5JsKlrlQ'
 
@@ -868,7 +871,7 @@ class CFB(callbacks.Plugin):
 
     def cfbteamstats(self, irc, msg, args, optstat):
         """[stat]
-        Display team leaders for a specific CFB stat.
+        Display team leaders for a specific CFB stat. Ex: totalOffense
         """
         
         validcategories = { 'totalOffense':'total', 'sacks':'defense/sort/sacks', 'fg':'kicking/sort/fieldGoalsMade',
