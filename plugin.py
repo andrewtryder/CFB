@@ -602,7 +602,11 @@ class CFB(callbacks.Plugin):
                         new_data[str(stat.getText())].append(appendString + " |")  
                     else:
                         new_data[str(stat.getText())].append(appendString)
-                
+        
+        if len(new_data) < 1:
+            irc.reply("I did not find any weekly leaders. Perhaps you're looking at a new week with no games played yet.")
+            return
+        
         if title:
             irc.reply(ircutils.mircColor(title.getText(), 'blue'))
         
