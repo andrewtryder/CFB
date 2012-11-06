@@ -181,7 +181,9 @@ class CFB(callbacks.Plugin):
     ######################
     
     def cfbconferences(self, irc, msg, args):
-        """Show valid conferences."""
+        """
+        Show valid conferences.
+        """
 
         conferences = self._validconfs()
         irc.reply("Valid conferences are: %s" % (string.join([ircutils.bold(item) for item in conferences], " | ")))
@@ -560,6 +562,7 @@ class CFB(callbacks.Plugin):
             irc.reply(output)
 
     cfbstandings = wrap(cfbstandings, [('somethingWithoutSpaces')])
+    
     
     def cfbweeklyleaders(self, irc, msg, args):
         """
@@ -978,13 +981,13 @@ class CFB(callbacks.Plugin):
         Display the schedule/results for team.
         """
         
-        lookupteam = self._lookupTeam(optteam)
+        lookupteam = self._lookupTeam(optteam, opttable='eid')
         
         if lookupteam == "0":
             irc.reply("I could not find a schedule for: %s" % optteam)
             return
         
-        url = 'http://www.cbssports.com/collegefootball/teams/schedule/%s/' % lookupteam
+        url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvdGVhbS9fL2lk') + '/%s/' % lookupteam
 
         try:
             req = urllib2.Request(url)
@@ -993,41 +996,29 @@ class CFB(callbacks.Plugin):
             irc.reply("Failed to open: %s" % url)
             return
             
-        html = html.replace('&amp;','&').replace(';','')
-    
         soup = BeautifulSoup(html)
         
-        if soup.find('table', attrs={'class':'data stacked'}).find('tr', attrs={'class':'title'}).find('td'):
-            title = soup.find('table', attrs={'class':'data stacked'}).find('tr', attrs={'class':'title'}).find('td')
-        else:
-            irc.reply("Something broke with schedules. Did formatting change?")
+        if not soup.find('div', attrs={'id':'showschedule'}):
+            irc.reply("Can not find schedule for: %s. Formatting break?" % optteam)
             return
-
-        div = soup.find('div', attrs={'id':'layoutTeamsPage'}) # must use this div first since there is an identical table.
-        table = div.find('table', attrs={'class':'data', 'width':'100%'})
-        rows = table.findAll('tr', attrs={'class':re.compile('^row[1|2]')})
+            
+        div = soup.find('div', attrs={'id':'showschedule'})
+        table = div.find('table', attrs={'class':'tablehead'})
+        tablehead = table.find('tr', attrs={'class':'stathead'}) 
+        rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*|^evenrow.*')})
 
         append_list = []
-        
+
         for row in rows:
-            date = row.find('td')
-            team = date.findNext('td').find('a')
-            time = team.findNext('td')
-            
-            if team.text.startswith('@'): # underline home
-                team = team.text
-            else:
-                team = ircutils.underline(team.text)
-        
-            if time.find('span'): # span has score time. empty otherwise.
-                time = time.find('span').string
-                append_list.append(date.text + " - " + ircutils.bold(team) + " (" + time + ")")
-            else:
-                time = time.string
-                append_list.append(date.text + " - " + ircutils.bold(team))
+            tds = row.findAll('td')
+            date = tds[0].getText()
+            opp = tds[1].getText()
+            result = tds[2].getText()
+            appendString = "{0} - {1} ({2})".format(date, opp, result)
+            append_list.append(appendString)
 
         descstring = string.join([item for item in append_list], " | ")
-        output = "{0} for {1} :: {2}".format(title.text, ircutils.bold(optteam.title()), descstring)
+        output = "{0} :: {1}".format(ircutils.bold(tablehead.getText()), descstring)
         
         irc.reply(output)
         
