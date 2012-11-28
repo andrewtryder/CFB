@@ -248,6 +248,27 @@ class CFB(callbacks.Plugin):
             irc.reply(each)
     
     cfbnews = wrap(cfbnews, [optional('somethingWithoutSpaces')])
+
+
+    def cfbcountdown(self, irc, msg, args):
+        """
+        Display the time until the next CFB season starts.
+        """
+        
+        dNow = datetime.datetime.now()
+        dStart = datetime.datetime(2013, 8, 29, 19, 0)
+        dDelta = dStart - dNow	
+	
+        days = '%d days' % dDelta.days               # days
+        hours = '%d hours' % int(dDelta.seconds/60/60)    # hrs
+        minutes = '%d minutes' % int(dDelta.seconds/60%60)  # mins
+        seconds = '%d seconds' % int(dDelta.seconds%60)     # secs
+
+        untilSeason = 'remaining until the start of the 2013 College Football Season'
+
+        irc.reply('There are... %s %s %s %s %s' % (days, hours, minutes, seconds, untilSeason))
+    
+    cfbcountdown = wrap(cfbcountdown)
     
     
     def cfbarrests(self, irc, msg, args):
