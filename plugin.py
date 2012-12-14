@@ -489,6 +489,78 @@ class CFB(callbacks.Plugin):
     cfbteaminfo = wrap(cfbteaminfo, [('text')])
     
     
+    def cfbpolls(self, irc, msg, args, optpoll, optyear, optweek):
+        """<AP|BCS> <year> <week #>
+        Display historical AP/BCS polls for a specific year and week. Works from 1936 on.
+        Ex. AP 1979 1 or BCS 2007 8
+        """
+        
+        optpoll = optpoll.lower() # lower to match the table id.
+        
+        # checks on input. different depending on the poll.
+        if optpoll == "ap": # first ap
+            if optyear < 1936 or optyear > datetime.datetime.now().year:
+                irc.reply("ERROR: year for AP must be after 1936 and less than the current year.")
+                return
+            if optweek < 1 or optweek > 16:
+                irc.reply("ERROR: week for AP must be between 1-16.")
+                return
+                
+        elif optpoll == "bcs": # now bcs. goes away in 2014?
+            if optyear < 1998 or optyear > datetime.datetime.now().year:
+                irc.reply("ERROR: year for BCS must be after 1998 and less than current year.")
+                return
+            if optweek < 1 or optweek > 8:
+                irc.reply("ERROR: week for BCS must be between 1-8.")
+                return
+        else: # if we don't have ap/bcs
+            irc.reply("ERROR: poll name must be one of the two: AP or BCS. Ex: BCS 2007 2")
+            return
+        
+        # build url and try+open
+        url = self._b64decode('aHR0cDovL3d3dy5zcG9ydHMtcmVmZXJlbmNlLmNvbS9jZmIveWVhcnMv') + '%s-polls.html' % optyear
+        
+        try:
+            req = urllib2.Request(url)
+            html = (urllib2.urlopen(req)).read()
+        except:
+            irc.reply("Failed to open: %s" % url)
+            return
+    
+        # process html
+        soup = BeautifulSoup(html)
+        table = soup.find('table', attrs={'id':optpoll})
+        tbody = table.find('tbody')
+        rows = tbody.findAll('tr', attrs={'class':''})
+
+        # containers to put all of the poll data/weekdates in.
+        poll = collections.defaultdict(list)
+        weekdate = {}
+
+        for row in rows: # process and populate all.
+            tds = row.findAll('td')
+            wk = tds[0].getText()
+            date = tds[1].getText()
+            rk = tds[2].getText()
+            school = tds[3].getText().replace('&amp;','&')
+            prev = tds[4].getText()
+            chng = tds[5].getText()
+            conf = tds[6].getText() 
+            poll[str(wk)].append("{0}. {1}".format(rk, school))
+            weekdate[str(wk)] = date # separate dict for week num/date.
+    
+        # now, get the poll output.
+        output = poll.get(str(optweek), None)
+
+        if output:
+            irc.reply("{0} {1} Week {2} ({3}):: {4}".format(ircutils.mircColor(optyear,'red'), optpoll.upper(),\
+                optweek, weekdate.get(str(optweek)), " ".join(output)))
+        else:
+            irc.reply("ERROR: I did not find a poll for {0} in year {1} for week {2}.".format(optpoll, optyear, optweek))
+            
+    cfbpolls = wrap(cfbpolls, [('somethingWithoutSpaces'), ('int'), ('int')])
+    
+    
     def cfbbowls(self, irc, msg, args, optyear, optbowl):
         """[year] [bowl name]
         Display bowl game result. Requires year and bowl name. Ex: 1982 Sugar or 1984 Rose
