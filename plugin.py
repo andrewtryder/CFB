@@ -561,7 +561,8 @@ class CFB(callbacks.Plugin):
                     string.join([ircutils.bold(str(k)) + ": " + str(v) for k,v in confcount.items()], " | ")))
             irc.reply("{0}".format(" ".join(output)))
         else:
-            irc.reply("ERROR: I did not find a poll for {0} in year {1} for week {2}.".format(optpoll, optyear, optweek))
+            irc.reply("ERROR: I did not find a poll for {0} in year {1} for week {2}. I do have one for weeks: {3}".format(optpoll,\
+                optyear, optweek, sorted(poll.keys())))
             
     cfbpolls = wrap(cfbpolls, [('somethingWithoutSpaces'), ('somethingWithoutSpaces'), ('somethingWithoutSpaces')])
     
