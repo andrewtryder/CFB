@@ -499,18 +499,18 @@ class CFB(callbacks.Plugin):
         
         # checks on input. different depending on the poll.
         if optpoll == "ap": # first ap
-            if optyear < 1936 or optyear > datetime.datetime.now().year:
+            if int(optyear) < 1936 or int(optyear) > datetime.datetime.now().year:
                 irc.reply("ERROR: year for AP must be after 1936 and less than the current year.")
                 return
-            if optweek < 1 or optweek > 16:
+            if int(optweek) < 1 or int(optweek) > 16:
                 irc.reply("ERROR: week for AP must be between 1-16.")
                 return
                 
         elif optpoll == "bcs": # now bcs. goes away in 2014?
-            if optyear < 1998 or optyear > datetime.datetime.now().year:
+            if int(optyear) < 1998 or int(optyear) > datetime.datetime.now().year:
                 irc.reply("ERROR: year for BCS must be after 1998 and less than current year.")
                 return
-            if optweek < 1 or optweek > 8:
+            if int(optweek) < 1 or int(optweek) > 8:
                 irc.reply("ERROR: week for BCS must be between 1-8.")
                 return
         else: # if we don't have ap/bcs
