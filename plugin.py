@@ -563,7 +563,7 @@ class CFB(callbacks.Plugin):
         else:
             irc.reply("ERROR: I did not find a poll for {0} in year {1} for week {2}.".format(optpoll, optyear, optweek))
             
-    cfbpolls = wrap(cfbpolls, [('somethingWithoutSpaces'), ('int'), ('int')])
+    cfbpolls = wrap(cfbpolls, [('somethingWithoutSpaces'), ('somethingWithoutSpaces'), ('somethingWithoutSpaces')])
     
     
     def cfbbowls(self, irc, msg, args, optyear, optbowl):
