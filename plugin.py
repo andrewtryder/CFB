@@ -491,7 +491,7 @@ class CFB(callbacks.Plugin):
     
     def cfbpolls(self, irc, msg, args, optpoll, optyear, optweek):
         """<AP|BCS> <year> <week #>
-        Display historical AP/BCS polls for a specific year and week. Works from 1936 on.
+        Display historical AP/BCS polls (Top 25)for a specific year and week. Works from 1936 on for AP; 1998 for BCS.
         Ex. AP 1979 1 or BCS 2007 8
         """
         
@@ -533,9 +533,10 @@ class CFB(callbacks.Plugin):
         tbody = table.find('tbody')
         rows = tbody.findAll('tr', attrs={'class':''})
 
-        # containers to put all of the poll data/weekdates in.
+        # containers to put all of the poll data/weekdates/confs in.
         poll = collections.defaultdict(list)
         weekdate = {}
+        confcount = {}
 
         for row in rows: # process and populate all.
             tds = row.findAll('td')
@@ -545,16 +546,20 @@ class CFB(callbacks.Plugin):
             school = tds[3].getText().replace('&amp;','&')
             prev = tds[4].getText()
             chng = tds[5].getText()
-            conf = tds[6].getText() 
+            conf = tds[6].find('a').getText() 
             poll[str(wk)].append("{0}. {1}".format(rk, school))
             weekdate[str(wk)] = date # separate dict for week num/date.
+            if str(wk) == str(optweek): # is the week the same as input?
+                confcount[conf] = confcount.get(conf, 0) + 1
     
         # now, get the poll output.
         output = poll.get(str(optweek), None)
 
         if output:
-            irc.reply("{0} {1} Week {2} ({3}):: {4}".format(ircutils.mircColor(optyear,'red'), optpoll.upper(),\
-                optweek, weekdate.get(str(optweek)), " ".join(output)))
+            irc.reply("{0} {1} Week {2} ({3}) :: {4}".format(ircutils.mircColor(optyear,'red'),\
+                optpoll.upper(), optweek, weekdate.get(str(optweek)),\
+                    string.join([ircutils.bold(str(k)) + ": " + str(v) for k,v in confcount.items()], " | ")))
+            irc.reply("{0}".format(" ".join(output)))
         else:
             irc.reply("ERROR: I did not find a poll for {0} in year {1} for week {2}.".format(optpoll, optyear, optweek))
             
