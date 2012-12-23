@@ -2,10 +2,9 @@
 ###
 # Copyright (c) 2012, spline
 # All rights reserved.
-#
-#
 ###
 
+# my libs
 import os
 import sqlite3
 import urllib2
@@ -18,6 +17,7 @@ import datetime
 import time
 import json
 
+# supybot libs
 import supybot.utils as utils
 from supybot.commands import *
 import supybot.plugins as plugins
@@ -39,6 +39,7 @@ class CFB(callbacks.Plugin):
             yield g
 
     def _shortenUrl(self, url):
+        """Return a short url using google's API (goo.gl)."""
         posturi = "https://www.googleapis.com/urlshortener/v1/url"
         headers = {'Content-Type' : 'application/json'}
         data = {'longUrl' : url}
@@ -51,6 +52,7 @@ class CFB(callbacks.Plugin):
         return shorturi
 
     def _daysSince(self, string):
+        """Returns a short-date since from the cfbarrests."""
         a = datetime.date.today()
         b = datetime.datetime.strptime(string, "%B %d, %Y")
         b = b.date()
@@ -84,7 +86,6 @@ class CFB(callbacks.Plugin):
             teamlist.append(str(row[0]))
 
         cursor.close()
-        
         return teamlist
 
     def _validconfs(self, optlong=None):
@@ -108,7 +109,6 @@ class CFB(callbacks.Plugin):
             teamlist.append(str(row[0]))
 
         cursor.close()
-        
         return teamlist
 
     def _confEid(self, optconf):
@@ -125,7 +125,6 @@ class CFB(callbacks.Plugin):
         cursor.execute("select eid from confs where short=?", (optconf,))
         row = cursor.fetchone()
         cursor.close() 
-        
         return (str(row[0])) 
     
     def _translateConf(self, optconf):
@@ -140,7 +139,6 @@ class CFB(callbacks.Plugin):
         cursor.execute("select full from confs where short=?", (optconf,))
         row = cursor.fetchone()
         cursor.close()            
-
         return (str(row[0])) 
 
     def _lookupTeam(self, optteam, opttable=None):
@@ -186,14 +184,14 @@ class CFB(callbacks.Plugin):
         """
 
         conferences = self._validconfs()
-        irc.reply("Valid conferences are: %s" % (string.join([ircutils.bold(item) for item in conferences], " | ")))
+        irc.reply("Valid CFB Conferences are: %s" % (string.join([ircutils.bold(item) for item in conferences], " | ")))
         
     cfbconferences = wrap(cfbconferences)
 
 
     def cfbteams(self, irc, msg, args, optconf):
-        """[conference]
-        Display valid teams in a specific conference. 
+        """<conference>
+        Display valid teams in a specific conference. Ex: SEC.
         """
         
         optconf = optconf.upper()
@@ -617,8 +615,8 @@ class CFB(callbacks.Plugin):
     
     
     def cfbstandings(self, irc, msg, args, optconf):
-        """[conf]
-        Display conference standings.
+        """<conf>
+        Display conference standings. Ex: SEC.
         """
         
         optconf = optconf.upper()
@@ -630,8 +628,6 @@ class CFB(callbacks.Plugin):
         eid = self._confEid(optconf)
         
         url = 'http://m.espn.go.com/ncf/standings?groupId=%s&y=1&wjb=' % eid
-        
-        self.log.info(url)
 
         try:
             req = urllib2.Request(url)
@@ -761,53 +757,82 @@ class CFB(callbacks.Plugin):
     cfbpowerrankings = wrap(cfbpowerrankings)
     
         
-    def cfbrankings(self, irc, msg, args, optpoll):
-        """[ap|usatoday|bcs]
-        Display this week's poll.
+    def cfbrankings(self, irc, msg, args, optlist, optinput):
+        """[--poll ap|usatoday|bcs] [team]
+        Display this week's polls. 
+        If team is specified, it will display only that team's ranking if ranked. Ex: Alabama
+        Use --poll to display specific poll. Ignores input on team and displays the full pull.
         """
+                
+        # handle optlist
+        optpoll = False # false to start. validate and go from there.
+        if optlist:
+            for (key, value) in optlist:
+                if key == "poll":
+                    optpoll = value.lower()
+                    validpoll = ['ap', 'usatoday', 'bcs']
+                    if value not in validpoll:
+                        irc.reply("--poll must be one of: %s" % validpoll)
+                        return
+
         
-        validpoll = ['ap', 'usatoday', 'bcs']
-        
-        optpoll = optpoll.lower()
-        
-        if optpoll not in validpoll:
-            irc.reply("Poll must be one of: %s" % validpoll)
-            return
-        
-        if optpoll == "ap":
-            url = 'http://m.espn.go.com/ncf/rankings?pollId=1&wjb=' # AP
-        if optpoll == "usatoday":
-            url = 'http://m.espn.go.com/ncf/rankings?pollId=2&wjb=' # USAT
-        if optpoll == "bcs":
-            url = 'http://m.espn.go.com/ncf/rankings?pollId=3&wjb=' # BCS
-    
+        url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscw==')
+        if optpoll:
+            # BCS
+            # url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTQ=')
+            # AP 
+            # url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTE=')
+            # USAToday
+            # url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTM=')
+            pass
+            
+        # grab the url.
         try:
             req = urllib2.Request(url)
             html = (urllib2.urlopen(req)).read()
-        except:
+        except, e:
             irc.reply("Failed to open: %s" % url)
+            self.log.error("Failed to open: %s ERROR: %s" % url, e)
             return
         
-        if "No rankings available." in html:
-            irc.reply("No rankings available.")
-            return
+        # process html
+        soup = BeautifulSoup(html.replace('&nbsp;',''))
+        div = soup.find('div', attrs={'id':'ysprankings-hd'})
+        h2 = div.find('h2') # heading.
+        tables = soup.findAll('div', attrs={'class':'ysprankings_poll ysprankings_poll_3column'})
+        if len(tables) < 1: # last sanity check.
+            irc.reply("Something broke in the formatting checking the polls.")
+        polls = collections.defaultdict(list)
+        # now, process html data in the tables, each poll has its own.
+        # polls[string] = [teams] 
+        for table in tables:
+            ul = table.find('ul') # all teams are in a ul
+            poll = table.find('div', attrs={'class':'hd'}) # poll's name hidden in here. replace text below.
+            poll = poll.getText().replace('AP Top 25','AP').replace('USA Today','USAToday').replace('Bowl Champ. Series','BCS')
+            lis = ul.findAll('li')
+            tmppoll = [] # temp list for all teams.
+            for i,li in enumerate(lis): # enumerate through each team.
+                if li.find('span'): # do some cleaning up. span has rank. no need.
+                    li.span.extract()   
+                team = li.getText().replace(';','') # get the remaining text, including (Votes)
+                tmppoll.append(str(team)) # append to list, order kept.
+            polls[str(poll)] = tmppoll # finally, append the list to our defaultdict.
 
-        html = html.replace('class="ind alt','class="ind')
+        # now that data is in our container, process it for output. conditional if we have input.
+        if optinput:
+            for i,x in polls.items():
+                matchingteams = [q for q, item in enumerate(x) if re.search(optinput, item, re.I)]
+                if matchingteams:
+                    output = []
+                    for match in matchingteams:            
+                        output.append("#{0}. {1}".format(match+1, x[match])) 
+                        irc.reply("{0} {1}".format(i, " | ".join(output)))
+                else:
+                    irc.reply("I did not find anything matching: %s" % optinput)
+        else:
+            irc.reply("{0} {1}".format(i,x))
 
-        soup = BeautifulSoup(html)
-        rows = soup.find('table', attrs={'class':'table'}).findAll('tr')[1:] # skip header row
-
-        append_list = []
-
-        for row in rows:
-            rank = row.find('td')
-            team = rank.findNext('td')
-            append_list.append(str(rank.getText()) + ". " + str(ircutils.bold(team.getText())))
-    
-        descstring = string.join([item for item in append_list], " | ") 
-        irc.reply(descstring)
-    
-    cfbrankings = wrap(cfbrankings, [('somethingWithoutSpaces')])    
+    cfbrankings = wrap(cfbrankings, [getopts({'poll':'', 'details':''}), optional('text')])    
 
     
     def cfbteamleaders(self, irc, msg, args, opttype, optteam):
