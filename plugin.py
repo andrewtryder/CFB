@@ -775,22 +775,23 @@ class CFB(callbacks.Plugin):
                         irc.reply("--poll must be one of: %s" % validpoll)
                         return
 
+        # url is conditional depending on the optpoll + else = generic poll.
+        if optpoll == 'bcs':
+            url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTQ=')
+        elif optpoll == 'ap': 
+            url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTE=')
+        elif optpoll == 'usatoday':
+            url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTM=')
+        else:
+            url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscw==')
         
-        url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscw==')
-        if optpoll:
-            # BCS
-            # url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTQ=')
-            # AP 
-            # url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTE=')
-            # USAToday
-            # url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTM=')
-            pass
-            
+        self.log.info(str(url))
+        
         # grab the url.
         try:
             req = urllib2.Request(url)
             html = (urllib2.urlopen(req)).read()
-        except, e:
+        except Exception as e:
             irc.reply("Failed to open: %s" % url)
             self.log.error("Failed to open: %s ERROR: %s" % url, e)
             return
