@@ -22,6 +22,5 @@ def configure(advanced):
 
 
 CFB = conf.registerPlugin('CFB')
-conf.registerGlobalValue(CFB, 'dbLocation', registry.String(os.path.abspath(os.path.dirname(__file__)) + '/cfb.db', """Absolute path for cfb.db sqlite3 database file location."""))
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=250:

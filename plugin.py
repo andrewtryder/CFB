@@ -33,6 +33,11 @@ class CFB(callbacks.Plugin):
     This should describe *how* to use this plugin."""
     threaded = True
 
+    def __init__(self, irc):
+        self.__parent = super(MLB, self)
+        self.__parent.__init__(irc)
+        self._cfbdb = os.path.abspath(os.path.dirname(__file__)) + '/db/cfb.db'
+
     def _batch(self, iterable, size):
         c = count()
         for k, g in groupby(iterable, lambda x:c.next()//size):
@@ -71,7 +76,7 @@ class CFB(callbacks.Plugin):
 
     def _validteams(self, optconf):
         """Returns a list of valid teams for input verification."""
-        db_filename = self.registryValue('dbLocation')
+        db_filename = self._cfbdb
 
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
@@ -89,7 +94,7 @@ class CFB(callbacks.Plugin):
         return teamlist
 
     def _validconfs(self, optlong=None):
-        db_filename = self.registryValue('dbLocation')
+        db_filename = self._cfbdb
 
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
@@ -114,7 +119,7 @@ class CFB(callbacks.Plugin):
     def _confEid(self, optconf):
         """Lookup conf (shortname) eID."""
 
-        db_filename = self.registryValue('dbLocation')
+        db_filename = self._cfbdb
 
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
@@ -128,7 +133,7 @@ class CFB(callbacks.Plugin):
         return (str(row[0]))
 
     def _translateConf(self, optconf):
-        db_filename = self.registryValue('dbLocation')
+        db_filename = self._cfbdb
 
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
@@ -142,7 +147,7 @@ class CFB(callbacks.Plugin):
         return (str(row[0]))
 
     def _lookupTeam(self, optteam, opttable=None):
-        db_filename = self.registryValue('dbLocation')
+        db_filename = self._cfbdb
 
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
