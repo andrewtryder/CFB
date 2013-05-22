@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ###
-# Copyright (c) 2012, spline
+# Copyright (c) 2012-2013, spline
 # All rights reserved.
 ###
 
@@ -32,7 +32,7 @@ class CFB(callbacks.Plugin):
     """Add the help for "@plugin help CFB" here
     This should describe *how* to use this plugin."""
     threaded = True
-    
+
     def _batch(self, iterable, size):
         c = count()
         for k, g in groupby(iterable, lambda x:c.next()//size):
@@ -59,7 +59,7 @@ class CFB(callbacks.Plugin):
         delta = b - a
         delta = abs(delta.days)
         return delta
-    
+
     def _shortDateFormat(self, string):
         """Return a short date string from a full date string."""
         return time.strftime('%m/%d', time.strptime(string, '%B %d, %Y'))
@@ -68,20 +68,20 @@ class CFB(callbacks.Plugin):
         """Returns base64 encoded string."""
         import base64
         return base64.b64decode(string)
-        
+
     def _validteams(self, optconf):
         """Returns a list of valid teams for input verification."""
         db_filename = self.registryValue('dbLocation')
-        
+
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
             return
-            
+
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
-        cursor.execute("select team from cfb where conf=?", (optconf,))        
+        cursor.execute("select team from cfb where conf=?", (optconf,))
         teamlist = []
-        
+
         for row in cursor.fetchall():
             teamlist.append(str(row[0]))
 
@@ -90,21 +90,21 @@ class CFB(callbacks.Plugin):
 
     def _validconfs(self, optlong=None):
         db_filename = self.registryValue('dbLocation')
-        
+
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
             return
-        
+
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
-    
+
         if optlong:
-            cursor.execute("select full from confs")        
+            cursor.execute("select full from confs")
         else:
-            cursor.execute("select short from confs")        
-    
+            cursor.execute("select short from confs")
+
         teamlist = []
-        
+
         for row in cursor.fetchall():
             teamlist.append(str(row[0]))
 
@@ -113,69 +113,69 @@ class CFB(callbacks.Plugin):
 
     def _confEid(self, optconf):
         """Lookup conf (shortname) eID."""
-        
+
         db_filename = self.registryValue('dbLocation')
-        
+
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
             return
-        
+
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
         cursor.execute("select eid from confs where short=?", (optconf,))
         row = cursor.fetchone()
-        cursor.close() 
-        return (str(row[0])) 
-    
+        cursor.close()
+        return (str(row[0]))
+
     def _translateConf(self, optconf):
         db_filename = self.registryValue('dbLocation')
-        
+
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
             return
-        
+
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
         cursor.execute("select full from confs where short=?", (optconf,))
         row = cursor.fetchone()
-        cursor.close()            
-        return (str(row[0])) 
+        cursor.close()
+        return (str(row[0]))
 
     def _lookupTeam(self, optteam, opttable=None):
         db_filename = self.registryValue('dbLocation')
-        
+
         if not os.path.exists(db_filename):
             self.log.error("ERROR: I could not find: %s" % db_filename)
             return
-        
+
         if not opttable: # tid is the default
             opttable = 'tid'
-        
+
         conn = sqlite3.connect(db_filename)
         cursor = conn.cursor()
         query = "select %s from cfb where nn LIKE ?" % opttable
         self.log.info(query)
         cursor.execute(query, (optteam,))
         row = cursor.fetchone()
-        
+
         if row is None: # look at nicknames first, then teams
             query = "select %s from cfb where team LIKE ?" % opttable
             self.log.info(query)
             cursor.execute(query, (optteam,))
             row = cursor.fetchone()
-            
+
             if row is None:
                 conn.close()
                 return "0"
             else:
                 conn.close()
-                return (str(row[0]))      
+                return (str(row[0]))
         else:
             conn.close()
             return (str(row[0]))
 
     ######################
-    # public functions   #        
+    # public functions   #
     ######################
 
     def cfbfinances(self, irc, msg, args, optteam):
@@ -183,7 +183,7 @@ class CFB(callbacks.Plugin):
         # http://www.usatoday.com/sports/college/schools/finances/
         pass
     cfbfinances = wrap(cfbfinances)
-    
+
     def cfbconferences(self, irc, msg, args):
         """
         Show valid conferences.
@@ -191,7 +191,7 @@ class CFB(callbacks.Plugin):
 
         conferences = self._validconfs()
         irc.reply("Valid CFB Conferences are: %s" % (string.join([ircutils.bold(item) for item in conferences], " | ")))
-        
+
     cfbconferences = wrap(cfbconferences)
 
 
@@ -199,26 +199,26 @@ class CFB(callbacks.Plugin):
         """<conference>
         Display valid teams in a specific conference. Ex: SEC.
         """
-        
+
         optconf = optconf.upper()
-        
+
         if optconf not in self._validconfs():
             irc.reply("Invalid conf. Must be one of: %s" % self._validconfs())
             return
-        
+
         fullconf = self._translateConf(optconf) # needs to be lowercase, which this will return
         teams = self._validteams(fullconf)
-                
-        irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item.title()) for item in teams], " | "))) # title because all entries are lc. 
-        
+
+        irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item.title()) for item in teams], " | "))) # title because all entries are lc.
+
     cfbteams = wrap(cfbteams, [('somethingWithoutSpaces')])
 
 
     def cfbnews(self, irc, msg, args, optnumber):
         """<#>
-        Display latest CFB news. If # is given (min 1, max 10), will display more. 
+        Display latest CFB news. If # is given (min 1, max 10), will display more.
         """
-        
+
         url = self._b64decode('aHR0cDovL20uZXNwbi5nby5jb20vbmNmL25ld3M/JndqYj0=')
 
         if optnumber:
@@ -235,34 +235,53 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         html = html.replace('class="ind alt"','class="ind"')
 
         soup = BeautifulSoup(html)
         divs = soup.findAll('div', attrs={'class':'ind', 'style':'white-space: nowrap;'})
-        
+
         append_list = []
-        
+
         for div in divs[0:int(optnumber)]:
             link = div.find('a')['href']
             linkText = div.find('a')
             append_list.append(ircutils.bold(linkText.getText()) + " " + self._shortenUrl(link))
-        
+
         for each in append_list:
             irc.reply(each)
-    
+
     cfbnews = wrap(cfbnews, [optional('somethingWithoutSpaces')])
 
+    def cfbplayoffcountdown(self, irc, msg, args):
+        """
+        Display the time until the CFB playoffs.
+        """
+
+        dNow = datetime.datetime.now()
+        dStart = datetime.datetime(2015, 1, 1, 1, 0)
+        dDelta = dStart - dNow
+
+        days = '%d days' % dDelta.days               # days
+        hours = '%d hours' % int(dDelta.seconds/60/60)    # hrs
+        minutes = '%d minutes' % int(dDelta.seconds/60%60)  # mins
+        seconds = '%d seconds' % int(dDelta.seconds%60)     # secs
+
+        untilSeason = 'remaining until the start of the 2015 College Football Playoff'
+
+        irc.reply('There are... %s %s %s %s %s' % (days, hours, minutes, seconds, untilSeason))
+
+    cfbplayoffcountdown = wrap(cfbplayoffcountdown)
 
     def cfbcountdown(self, irc, msg, args):
         """
         Display the time until the next CFB season starts.
         """
-        
+
         dNow = datetime.datetime.now()
         dStart = datetime.datetime(2013, 8, 29, 19, 0)
-        dDelta = dStart - dNow	
-	
+        dDelta = dStart - dNow
+
         days = '%d days' % dDelta.days               # days
         hours = '%d hours' % int(dDelta.seconds/60/60)    # hrs
         minutes = '%d minutes' % int(dDelta.seconds/60%60)  # mins
@@ -271,15 +290,15 @@ class CFB(callbacks.Plugin):
         untilSeason = 'remaining until the start of the 2013 College Football Season'
 
         irc.reply('There are... %s %s %s %s %s' % (days, hours, minutes, seconds, untilSeason))
-    
+
     cfbcountdown = wrap(cfbcountdown)
-    
-    
+
+
     def cfbarrests(self, irc, msg, args):
         """
         Display the last 5 CFB arrests.
-        """    
-    
+        """
+
         url = self._b64decode('aHR0cDovL2FycmVzdG5hdGlvbi5jb20vY2F0ZWdvcnkvY29sbGVnZS1mb290YmFsbC8=')
 
         try:
@@ -288,11 +307,11 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         html = html.replace('&nbsp;',' ').replace('&#8217;','’')
 
         soup = BeautifulSoup(html)
-        lastDate = soup.findAll('span', attrs={'class':'time'})[0] 
+        lastDate = soup.findAll('span', attrs={'class':'time'})[0]
         divs = soup.findAll('div', attrs={'class':'entry'})
 
         append_list = []
@@ -301,7 +320,7 @@ class CFB(callbacks.Plugin):
             title = div.find('h2')
             datet = div.find('span', attrs={'class':'time'})
             datet = self._shortDateFormat(str(datet.getText()))
-            arrestedFor = div.find('strong', text=re.compile('Team:'))    
+            arrestedFor = div.find('strong', text=re.compile('Team:'))
             if arrestedFor:
                 matches = re.search(r'<strong>Team:.*?</strong>(.*?)<br />', arrestedFor.findParent('p').renderContents(), re.I|re.S|re.M)
                 if matches:
@@ -310,23 +329,23 @@ class CFB(callbacks.Plugin):
                     college = "None"
             else:
                 college = "None"
-            
+
             append_list.append(ircutils.bold(datet) + " :: " + title.getText() + " - " + college) # finally add it all
-        
+
         daysSince = self._daysSince(str(lastDate.getText()))
         irc.reply("{0} days since last CFB arrest".format(ircutils.mircColor(daysSince, 'red')))
-        
+
         for each in append_list[0:6]:
             irc.reply(each)
 
     cfbarrests = wrap(cfbarrests)
-    
-    
+
+
     def cfbanalysis(self, irc, msg, args, optnumber):
         """<#>
-        Display latest CFB analysis. If # is given (min 1, max 10), will display more. 
+        Display latest CFB analysis. If # is given (min 1, max 10), will display more.
         """
-        
+
         url = self._b64decode('aHR0cDovL20uZXNwbi5nby5jb20vbmNmL2FuYWx5c2lzPyZ3amI9')
 
         if optnumber:
@@ -343,32 +362,32 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         html = html.replace('class="ind alt"','class="ind"')
 
         soup = BeautifulSoup(html)
         divs = soup.findAll('div', attrs={'class':'ind', 'style':'white-space: nowrap;'})
-        
+
         append_list = []
-        
+
         for div in divs[0:int(optnumber)]:
             link = div.find('a')['href']
             linkText = div.find('a')
             append_list.append(ircutils.bold(linkText.getText()) + " " + self._shortenUrl(link))
-        
+
         for each in append_list:
             irc.reply(each)
-    
+
     cfbanalysis = wrap(cfbanalysis, [optional('somethingWithoutSpaces')])
-    
-    
+
+
     def spurrier(self, irc, msg, args):
         """
         Display a random Steve Spurrier quote.
         """
-        
+
         from random import choice
-    
+
         url = 'https://docs.google.com/document/pub?id=1oKceGxP6ReL9CAeVrLhdtF_DnGC9K7HY4Sn5JsKlrlQ'
 
         try:
@@ -378,7 +397,7 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         soup = BeautifulSoup(html)
         quotes = soup.findAll('p', attrs={'class':re.compile('^c.*?')})
 
@@ -394,30 +413,30 @@ class CFB(callbacks.Plugin):
 
         output = choice(append_list)
         irc.reply(output)
-    
+
     spurrier = wrap(spurrier)
-    
-    
+
+
     def cfbinjury(self, irc, msg, args, optteam):
         """[team]
         Display injury information for team.
         """
-        
+
         lookupteam = self._lookupTeam(optteam, opttable='usat')
-        
+
         if lookupteam == "0":
             irc.reply("I could not find a schedule for: %s" % optteam)
             return
-        
+
         url = self._b64decode('aHR0cDovL3Nwb3J0c2RpcmVjdC51c2F0b2RheS5jb20vZm9vdGJhbGwvbmNhYWYtdGVhbXMuYXNweD9wYWdlPS9kYXRhL25jYWFmL3RlYW1zLw==') + 'team%s.html' % lookupteam
-        
+
         try:
             req = urllib2.Request(url)
             html = (urllib2.urlopen(req)).read()
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         html = html.replace('&#039; ','-').replace('&amp;','&')
 
         soup = BeautifulSoup(html)
@@ -432,7 +451,7 @@ class CFB(callbacks.Plugin):
             injuries = table.findAll('tr', attrs={'valign':'top'})
             if len(injuries) < 1:
                 injReport = "No injuries to report."
-            else:    
+            else:
                 injReport = []
                 for injury in injuries:
                     tds = injury.findAll('td')
@@ -440,33 +459,33 @@ class CFB(callbacks.Plugin):
                     status = tds[3]
                     appendText = str(player.getText() + " " + status.getText())
                     injReport.append(appendText)
-        
+
         output = "{0} injury report :: {1}".format(ircutils.bold(teamName.getText()), injReport)
         irc.reply(output)
-        
+
     cfbinjury = wrap(cfbinjury, [('text')])
-    
-    
+
+
     def cfbteaminfo(self, irc, msg, args, optteam):
         """[team]
         Display basic info/stats on a team
         """
-        
+
         lookupteam = self._lookupTeam(optteam)
-        
+
         if lookupteam == "0":
             irc.reply("I could not find a schedule for: %s" % optteam)
             return
-        
+
         url = 'http://www.cbssports.com/collegefootball/teams/page/%s/' % lookupteam
 
-        try:        
+        try:
             req = urllib2.Request(url)
             html = (urllib2.urlopen(req)).read()
         except:
             irc.reply("Failed to open %s" % url)
             return
-            
+
         html = html.replace('&amp;','&').replace(';','')
 
         soup = BeautifulSoup(html)
@@ -487,20 +506,20 @@ class CFB(callbacks.Plugin):
         output = "{0} :: {1} - Rushing: o: {2} d: {3}  Passing: o: {4} d: {5}  Overall: o: {6} d: {7}".format(\
             ircutils.underline(name.text), record.text, rushingOff.text, rushingDef.text,\
             passingOff.text, passingDef.text, overallOff.text, overallDef.text)
-            
+
         irc.reply(output)
-        
+
     cfbteaminfo = wrap(cfbteaminfo, [('text')])
-    
-    
+
+
     def cfbpolls(self, irc, msg, args, optpoll, optyear, optweek):
         """<AP|BCS> <year> <week #>
         Display historical AP/BCS polls (Top 25)for a specific year and week. Works from 1936 on for AP; 1998 for BCS.
         Ex. AP 1979 1 or BCS 2007 8
         """
-        
+
         optpoll = optpoll.lower() # lower to match the table id.
-        
+
         # checks on input. different depending on the poll.
         if optpoll == "ap": # first ap
             if int(optyear) < 1936 or int(optyear) > datetime.datetime.now().year:
@@ -509,7 +528,7 @@ class CFB(callbacks.Plugin):
             if int(optweek) < 1 or int(optweek) > 16:
                 irc.reply("ERROR: week for AP must be between 1-16.")
                 return
-                
+
         elif optpoll == "bcs": # now bcs. goes away in 2014?
             if int(optyear) < 1998 or int(optyear) > datetime.datetime.now().year:
                 irc.reply("ERROR: year for BCS must be after 1998 and less than current year.")
@@ -520,17 +539,17 @@ class CFB(callbacks.Plugin):
         else: # if we don't have ap/bcs
             irc.reply("ERROR: poll name must be one of the two: AP or BCS. Ex: BCS 2007 2")
             return
-        
+
         # build url and try+open
         url = self._b64decode('aHR0cDovL3d3dy5zcG9ydHMtcmVmZXJlbmNlLmNvbS9jZmIveWVhcnMv') + '%s-polls.html' % optyear
-        
+
         try:
             req = urllib2.Request(url)
             html = (urllib2.urlopen(req)).read()
         except:
             irc.reply("Failed to open: %s" % url)
             return
-    
+
         # process html
         soup = BeautifulSoup(html)
         table = soup.find('table', attrs={'id':optpoll})
@@ -550,12 +569,12 @@ class CFB(callbacks.Plugin):
             school = tds[3].getText().replace('&amp;','&')
             prev = tds[4].getText()
             chng = tds[5].getText()
-            conf = tds[6].find('a').getText() 
+            conf = tds[6].find('a').getText()
             poll[str(wk)].append("{0}. {1}".format(rk, school))
             weekdate[str(wk)] = date # separate dict for week num/date.
             if str(wk) == str(optweek): # is the week the same as input?
                 confcount[conf] = confcount.get(conf, 0) + 1
-    
+
         # now, get the poll output.
         output = poll.get(str(optweek), None)
 
@@ -567,23 +586,23 @@ class CFB(callbacks.Plugin):
         else:
             irc.reply("ERROR: I did not find a poll for {0} in year {1} for week {2}. I do have one for weeks: {3}".format(optpoll,\
                 optyear, optweek, sorted(poll.keys())))
-            
+
     cfbpolls = wrap(cfbpolls, [('somethingWithoutSpaces'), ('somethingWithoutSpaces'), ('somethingWithoutSpaces')])
-    
-    
+
+
     def cfbbowls(self, irc, msg, args, optyear, optbowl):
         """[year] [bowl name]
         Display bowl game result. Requires year and bowl name. Ex: 1982 Sugar or 1984 Rose
         """
-        
+
         currentYear = datetime.datetime.now().strftime("%Y")
-        
+
         if optyear < 1900 or optyear > currentYear:
             irc.reply("Year must be between 1900 and %s" % currentYear)
             return
-                        
+
         optbowl = optbowl.lower().replace('bowl','').strip()
-        
+
         url = 'http://www.sports-reference.com/cfb/years/%s-bowls.html' % optyear
 
         try:
@@ -592,11 +611,11 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         soup = BeautifulSoup(html)
         table = soup.find('table', attrs={'id':'bowls'})
         rows = table.findAll('tr')[1:]
-       
+
         new_data = collections.defaultdict(list)
 
         for row in rows:
@@ -616,23 +635,23 @@ class CFB(callbacks.Plugin):
             irc.reply("Error: Bowl must be one of: %s" % new_data.keys())
         else:
             irc.reply(" ".join(output))
-    
+
     cfbbowls = wrap(cfbbowls, [('somethingWithoutSpaces'), ('text')])
-    
-    
+
+
     def cfbstandings(self, irc, msg, args, optconf):
         """<conf>
         Display conference standings. Ex: SEC.
         """
-        
+
         optconf = optconf.upper()
-        
+
         if optconf not in self._validconfs():
             irc.reply("Invalid conf. Must be one of: %s" % self._validconfs())
             return
-        
+
         eid = self._confEid(optconf)
-        
+
         url = 'http://m.espn.go.com/ncf/standings?groupId=%s&y=1&wjb=' % eid
 
         try:
@@ -658,18 +677,18 @@ class CFB(callbacks.Plugin):
                 div = row.findPrevious('td', attrs={'class':'sec row nw', 'width':'52%'})
                 new_data[str(div.getText())].append(str(team.getText() + " " + confwl.getText() + " (" + ovalwl.getText() + ")")) #setdefault method.
 
-        for i,j in new_data.iteritems(): # for each in the confs. 
+        for i,j in new_data.iteritems(): # for each in the confs.
             output = "{0} :: {1}".format(i, string.join([item for item in j], " | "))
             irc.reply(output)
 
     cfbstandings = wrap(cfbstandings, [('somethingWithoutSpaces')])
-    
-    
+
+
     def cfbweeklyleaders(self, irc, msg, args):
         """
         Display CFB weekly leaders.
         """
-        
+
         url = 'http://espn.go.com/college-football/weekly'
 
         try:
@@ -678,43 +697,43 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-    
+
         html = html.replace('tr class="evenrow', 'tr class="oddrow')
 
         soup = BeautifulSoup(html)
-        title = soup.find('h1', attrs={'class':'h2'}) 
-        tables = soup.findAll('table', attrs={'class':'tablehead'}) 
+        title = soup.find('h1', attrs={'class':'h2'})
+        tables = soup.findAll('table', attrs={'class':'tablehead'})
 
         new_data = collections.defaultdict(list)
 
         for table in tables:
-            rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*')})[0:3] # top 3 only. List can be long. 
-            for j,row in enumerate(rows): 
+            rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*')})[0:3] # top 3 only. List can be long.
+            for j,row in enumerate(rows):
                 stat = row.findPrevious('tr', attrs={'class':'stathead'})
                 colhead = row.findPrevious('tr', attrs={'class':'colhead'}).findAll('td')
                 statnames = row.findAll('td')
 
-                del statnames[3], colhead[3] # game is always 4th. delete this. 
-        
-                for i,statname in enumerate(statnames):            
+                del statnames[3], colhead[3] # game is always 4th. delete this.
+
+                for i,statname in enumerate(statnames):
                     appendString = str(ircutils.bold(colhead[i].text)) + ": " + str(statname.text) # prep string to add into the list.
-            
+
                     if i == len(statnames)-1 and not j == len(rows)-1: # last in each.
-                        new_data[str(stat.getText())].append(appendString + " |")  
+                        new_data[str(stat.getText())].append(appendString + " |")
                     else:
                         new_data[str(stat.getText())].append(appendString)
-        
+
         if len(new_data) < 1:
             irc.reply("I did not find any weekly leaders. Perhaps you're looking at a new week with no games played yet.")
             return
-        
+
         if title:
             irc.reply(ircutils.mircColor(title.getText(), 'blue'))
-        
+
         for i,j in new_data.iteritems():
             output = "{0} :: {1}".format(ircutils.underline(i), string.join([item for item in j], " "))
             irc.reply(output)
-        
+
     cfbweeklyleaders = wrap(cfbweeklyleaders)
 
 
@@ -722,7 +741,7 @@ class CFB(callbacks.Plugin):
         """
         Display this week's CFB Power Rankings.
         """
-        
+
         url = 'http://espn.go.com/college-football/powerrankings'
 
         try:
@@ -740,12 +759,12 @@ class CFB(callbacks.Plugin):
         t1 = table.findAll('tr', attrs={'class': re.compile('[even|odd]row')})[0:25]
 
         object_list = []
-        
+
         for row in t1:
             rowrank = row.find('td')
             rowteam = row.find('div', attrs={'style': re.compile('^padding.*')}).findAll('a')[1]
             rowrecord = row.find('span', attrs={'class': 'pr-record'})
-            rowlastweek = row.find('span', attrs={'class': 'pr-last'}) 
+            rowlastweek = row.find('span', attrs={'class': 'pr-last'})
 
             d = collections.OrderedDict()
             d['rank'] = str(rowrank.text)
@@ -759,17 +778,17 @@ class CFB(callbacks.Plugin):
 
         for N in self._batch(object_list, 8):
             irc.reply(' '.join(str(str(n['rank']) + "." + " " + ircutils.bold(n['team'])) + " (" + n['lastweek'] + ")" for n in N))
-        
+
     cfbpowerrankings = wrap(cfbpowerrankings)
-    
-        
+
+
     def cfbrankings(self, irc, msg, args, optlist, optinput):
         """[--poll ap|usatoday|bcs] [team]
-        Display this week's polls. 
+        Display this week's polls.
         If team is specified, it will display only that team's ranking if ranked. Ex: Alabama
         Use --poll to display specific poll. Ignores input on team and displays the full pull.
         """
-                
+
         # handle optlist
         optpoll = False # false to start. validate and go from there.
         if optlist:
@@ -784,15 +803,15 @@ class CFB(callbacks.Plugin):
         # url is conditional depending on the optpoll + else = generic poll.
         if optpoll == 'bcs':
             url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTQ=')
-        elif optpoll == 'ap': 
+        elif optpoll == 'ap':
             url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTE=')
         elif optpoll == 'usatoday':
             url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscz9wb2xsPTM=')
         else:
             url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscw==')
-        
+
         self.log.info(str(url))
-        
+
         # grab the url.
         try:
             req = urllib2.Request(url)
@@ -801,7 +820,7 @@ class CFB(callbacks.Plugin):
             irc.reply("Failed to open: %s" % url)
             self.log.error("Failed to open: %s ERROR: %s" % url, e)
             return
-        
+
         # process html
         soup = BeautifulSoup(html.replace('&nbsp;',''))
         div = soup.find('div', attrs={'id':'ysprankings-hd'})
@@ -811,7 +830,7 @@ class CFB(callbacks.Plugin):
             irc.reply("Something broke in the formatting checking the polls.")
         polls = collections.defaultdict(list)
         # now, process html data in the tables, each poll has its own.
-        # polls[string] = [teams] 
+        # polls[string] = [teams]
         for table in tables:
             ul = table.find('ul') # all teams are in a ul
             poll = table.find('div', attrs={'class':'hd'}) # poll's name hidden in here. replace text below.
@@ -820,7 +839,7 @@ class CFB(callbacks.Plugin):
             tmppoll = [] # temp list for all teams.
             for i,li in enumerate(lis): # enumerate through each team.
                 if li.find('span'): # do some cleaning up. span has rank. no need.
-                    li.span.extract()   
+                    li.span.extract()
                 team = li.getText().replace(';','') # get the remaining text, including (Votes)
                 tmppoll.append(str(team)) # append to list, order kept.
             polls[str(poll)] = tmppoll # finally, append the list to our defaultdict.
@@ -831,38 +850,38 @@ class CFB(callbacks.Plugin):
                 matchingteams = [q for q, item in enumerate(x) if re.search(optinput, item, re.I)]
                 if matchingteams:
                     output = []
-                    for match in matchingteams:            
-                        output.append("#{0}. {1}".format(match+1, x[match])) 
+                    for match in matchingteams:
+                        output.append("#{0}. {1}".format(match+1, x[match]))
                         irc.reply("{0} {1}".format(i, " | ".join(output)))
                 else:
                     irc.reply("I did not find anything matching: %s" % optinput)
         else:
             irc.reply("{0} {1}".format(i,x))
 
-    cfbrankings = wrap(cfbrankings, [getopts({'poll':'', 'details':''}), optional('text')])    
+    cfbrankings = wrap(cfbrankings, [getopts({'poll':'', 'details':''}), optional('text')])
 
-    
+
     def cfbteamleaders(self, irc, msg, args, opttype, optteam):
-        """<passing|rushing|receiving|touchdowns> [team] 
+        """<passing|rushing|receiving|touchdowns> [team]
         Display the top four leaders in team stats.
         """
-        
+
         validtypes = ['passing', 'rushing', 'receving', 'touchdowns']
-        
+
         opttype = opttype.lower()
-        
+
         if opttype not in validtypes:
             irc.reply("type must be one of: %s" % [validtypes])
             return
-        
+
         lookupteam = self._lookupTeam(optteam)
-        
+
         if lookupteam == "0":
             irc.reply("I could not find a schedule for: %s" % optteam)
             return
-        
+
         opttype = opttype.upper()
-        
+
         if opttype == "RUSHING":
             url = 'http://www.cbssports.com/collegefootball/teams/stats/%s/%s?&_1:col_1=4' % (lookupteam, opttype)
         else:
@@ -874,12 +893,12 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to remove: %s" % url)
             return
-            
+
         html = html.replace('&amp;','&').replace(';','')
-    
+
         soup = BeautifulSoup(html)
         table = soup.find('div', attrs={'id':'layoutTeamsPage'}).find('table', attrs={'class':'data'})
-        title = table.find('tr', attrs={'class':'title'}).find('td') 
+        title = table.find('tr', attrs={'class':'title'}).find('td')
         headers = table.find('tr', attrs={'class':'label'}).findAll('td')
         rows = table.findAll('tr', attrs={'class':re.compile('row[1|2]')})[0:5]
 
@@ -891,10 +910,10 @@ class CFB(callbacks.Plugin):
             for i,td in enumerate(tds):
                 d[str(headers[i].getText())] = str(td.getText())
             object_list.append(d)
-        
+
         for each in object_list:
             irc.reply(each)
-    
+
     cfbteamleaders = wrap(cfbteamleaders, [('somethingWithoutSpaces'), ('text')])
 
 
@@ -902,12 +921,12 @@ class CFB(callbacks.Plugin):
         """<--position LS|TE|RB|WR|QB|FB|P|DB|K|LB|OL|DL|T|S|DE|G|C|NT> [team]
         Display the roster for a CFB team. With optional --position POS, it will only display people listed at that position.
         """
-        
+
         position = None
         for (option, arg) in optlist:
             if option == 'position':
                 position = arg.upper()
-                
+
         validpositions = ['LS', 'TE', 'RB', 'WR', 'QB', 'FB', 'P', 'DB', 'K', 'LB', 'OL', 'DL', 'T', 'S', 'DE', 'G', 'C', 'NT']
 
         if position is not None:
@@ -916,7 +935,7 @@ class CFB(callbacks.Plugin):
                 return
 
         lookupteam = self._lookupTeam(optteam)
-        
+
         if lookupteam == "0":
             irc.reply("I could not find the team: %s" % optteam)
             return
@@ -929,7 +948,7 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         html = html.replace('&nbsp;','')
 
         soup = BeautifulSoup(html)
@@ -946,9 +965,9 @@ class CFB(callbacks.Plugin):
             pPos = tds[2]
             pString = str("#" + pNumber.getText() + " " + pName.getText())
             players[str(pPos.getText())].append(pString)
-    
+
         output_list = []
-        
+
         if position is not None:
             output = players.get(position, None)
             if output:
@@ -958,12 +977,12 @@ class CFB(callbacks.Plugin):
         else:
             for i,x in players.iteritems():
                 output_list.append("{0} :: {1}".format(i, " ".join(x)))
-        
+
             irc.reply("{0} Roster :: {1}".format(ircutils.mircColor(optteam.title(), 'red'), " | ".join(output_list)))
-    
-    cfbroster = wrap(cfbroster, [(getopts({'position':'somethingWithoutSpaces'})), ('text')])        
-    
-    
+
+    cfbroster = wrap(cfbroster, [(getopts({'position':'somethingWithoutSpaces'})), ('text')])
+
+
     def cfbheisman(self, irc, msg, args):
         """
         Display poll results on Heisman voting.
@@ -977,7 +996,7 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-                       
+
         html = html.replace('&nbsp;','')
 
         soup = BeautifulSoup(html)
@@ -997,13 +1016,13 @@ class CFB(callbacks.Plugin):
             points = tds[-1]
             appendString = str(ircutils.bold(player.getText()) + " " + school.getText() + " (" +points.getText() + ")")
             append_list.append(appendString)
-    
-        
+
+
         descstring = string.join([item for item in append_list], " | ")
         output = "{0} on {1} :: {2}".format(ircutils.mircColor(h2, 'red'), ircutils.bold(date), descstring)
 
         irc.reply(output)
-    
+
     cfbheisman = wrap(cfbheisman)
 
 
@@ -1011,14 +1030,14 @@ class CFB(callbacks.Plugin):
         """[stat]
         Display team leaders for a specific CFB stat. Ex: totalOffense
         """
-        
+
         validcategories = { 'totalOffense':'total', 'sacks':'defense/sort/sacks', 'fg':'kicking/sort/fieldGoalsMade',
                             'passing':'passing', 'int':'defense/sort/interceptions', 'xp':'kicking/sort/extraPointsMade', 'rushing':'rushing',
                             'punting':'punting', 'receiving':'receiving/sort/totalTouchdowns', 'koReturns':'returning/sort/kickReturnYards',
                             'firstDowns':'downs/sort/firstDowns', 'puntReturns':'returning/sort/puntReturnYards',
                             '3rdConv':'downs/sort/thirdDownConvs', '4thConv':'downs/sort/fourthDownConvs'
                             }
-        
+
         if optstat not in validcategories:
             irc.reply("Invalid stat/category. Must be one of: %s" % validcategories.keys())
             return
@@ -1031,7 +1050,7 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         html = html.replace('&nbsp;','')
 
         soup = BeautifulSoup(html)
@@ -1049,29 +1068,29 @@ class CFB(callbacks.Plugin):
             stat = row.find('td', attrs={'class':'sortcell'})
             appendString = str(ircutils.bold(team.getText()) + " " + stat.getText())
             append_list.append(appendString)
-        
+
         descstring = string.join([item for item in append_list], " | ")
         output = "{0} :: {1}".format(ircutils.mircColor(heading.getText(), 'red'), descstring)
-        
+
         irc.reply(output)
-    
+
     cfbteamstats = wrap(cfbteamstats, [('somethingWithoutSpaces')])
-    
-    
+
+
     def cfbstats(self, irc, msg, args, optstat):
         """[stat]
         Display individual leaders for a specific CFB stat.
         """
-        
-        validcategories = { 
+
+        validcategories = {
                     'rushing':'rushing', 'receving':'receving', 'touchdowns':'scoring/sort/totalTouchdowns',
                     'points':'scoring/sort/totalPoints', 'qbr':'passing/sort/collegeQuarterbackRating',
-                    'comppct':'passing/sort/completionPct', 'sacks':'defense/sort/sacks', 
-                    'int':'defense/sort/interceptions', 'fgs':'kicking/sort/fieldGoalsMade', 
+                    'comppct':'passing/sort/completionPct', 'sacks':'defense/sort/sacks',
+                    'int':'defense/sort/interceptions', 'fgs':'kicking/sort/fieldGoalsMade',
                     'punting':'punting', 'kickreturnyds':'returning/sort/kickReturnYards',
                     'puntreturnyards':'returning/sort/puntReturnYards', 'passing':'passing'
                     }
-        
+
         if optstat not in validcategories:
             irc.reply("Invalid stat/category. Must be one of: %s" % validcategories.keys())
             return
@@ -1084,7 +1103,7 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         html = html.replace('&nbsp;','')
 
         soup = BeautifulSoup(html)
@@ -1102,12 +1121,12 @@ class CFB(callbacks.Plugin):
             stat = row.find('td', attrs={'class':'sortcell'})
             appendString = str(ircutils.bold(player.getText()) + " (" + team.getText() + ") " + stat.getText())
             append_list.append(appendString)
-        
+
         descstring = string.join([item for item in append_list], " | ")
         output = "Leaders for {0} :: {1}".format(ircutils.mircColor(optstat, 'red'), descstring)
-        
+
         irc.reply(output)
-    
+
     cfbstats = wrap(cfbstats, [('somethingWithoutSpaces')])
 
 
@@ -1115,13 +1134,13 @@ class CFB(callbacks.Plugin):
         """[team]
         Display the schedule/results for team.
         """
-        
+
         lookupteam = self._lookupTeam(optteam, opttable='eid')
-        
+
         if lookupteam == "0":
             irc.reply("I could not find a schedule for: %s" % optteam)
             return
-        
+
         url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvdGVhbS9fL2lk') + '/%s/' % lookupteam
 
         try:
@@ -1130,16 +1149,16 @@ class CFB(callbacks.Plugin):
         except:
             irc.reply("Failed to open: %s" % url)
             return
-            
+
         soup = BeautifulSoup(html)
-        
+
         if not soup.find('div', attrs={'id':'showschedule'}):
             irc.reply("Can not find schedule for: %s. Formatting break?" % optteam)
             return
-            
+
         div = soup.find('div', attrs={'id':'showschedule'})
         table = div.find('table', attrs={'class':'tablehead'})
-        tablehead = table.find('tr', attrs={'class':'stathead'}) 
+        tablehead = table.find('tr', attrs={'class':'stathead'})
         rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*|^evenrow.*')})
 
         append_list = []
@@ -1154,9 +1173,9 @@ class CFB(callbacks.Plugin):
 
         descstring = string.join([item for item in append_list], " | ")
         output = "{0} :: {1}".format(ircutils.bold(tablehead.getText()), descstring)
-        
+
         irc.reply(output)
-        
+
     cfbschedule = wrap(cfbschedule, [('text')])
 
 Class = CFB
