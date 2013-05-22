@@ -1,6 +1,9 @@
 Supybot-CFB
 ===========
 
-Supybot plugin for college football (NCAA) things. 
+Supybot plugin for college football (NCAA) things.
+If you're looking for scores, that's in my Supybot-Scores plugin.
 
-You will need to manually create the db via cfb_db.py.
+
+NOTE: This is a personal plugin that evolved into something larger as I found people use it.
+I am always open to feature and function suggestions. Find me on irc.
