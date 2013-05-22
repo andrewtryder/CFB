@@ -34,7 +34,7 @@ class CFB(callbacks.Plugin):
     threaded = True
 
     def __init__(self, irc):
-        self.__parent = super(MLB, self)
+        self.__parent = super(CFB, self)
         self.__parent.__init__(irc)
         self._cfbdb = os.path.abspath(os.path.dirname(__file__)) + '/db/cfb.db'
 
