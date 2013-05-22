@@ -177,6 +177,12 @@ class CFB(callbacks.Plugin):
     ######################
     # public functions   #        
     ######################
+
+    def cfbfinances(self, irc, msg, args, optteam):
+
+        # http://www.usatoday.com/sports/college/schools/finances/
+        pass
+    cfbfinances = wrap(cfbfinances)
     
     def cfbconferences(self, irc, msg, args):
         """
