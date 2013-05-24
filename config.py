@@ -22,5 +22,5 @@ def configure(advanced):
 
 
 CFB = conf.registerPlugin('CFB')
-
+conf.registerGlobalValue(CFB, 'logURLs', registry.Boolean(True, """Should we log all URL calls?"""))
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=250:
