@@ -8,11 +8,13 @@
 import os
 import sqlite3
 from BeautifulSoup import BeautifulSoup
-import base64
+from base64 import b64decode
 import re
 import collections
 import datetime
 from random import choice
+import jellyfish  # similarteams.
+from operator import itemgetter
 # supybot libs
 import supybot.utils as utils
 from supybot.commands import *
@@ -122,7 +124,7 @@ class CFB(callbacks.Plugin):
 	def _b64decode(self, string):
 		"""Returns base64 encoded string."""
 
-		return base64.b64decode(string)
+		return b64decode(string)
 
 	######################
 	# DATABASE FUNCTIONS #
@@ -171,6 +173,24 @@ class CFB(callbacks.Plugin):
 		# return.
 		return row[0]
 
+	def _similarTeams(self, optteam, opttable=None):
+		"""Do fuzzy string matching to find similar team names."""
+
+		similar = [] # empty lists to put our results in.
+		# now do our sql work.
+		with sqlite3.connect(self._cfbdb) as db:
+			cursor = db.cursor() # select all fullnames, eid, rid.
+			cursor.execute("SELECT nn, team, %s FROM cfb" % opttable)
+			rows = cursor.fetchall()
+		# iterate over all rows and do math.
+		for row in rows:  # row[0] = nn, row[1] = team, row[2] (what we're looking for.)
+			similar.append({'jaro':jellyfish.jaro_distance(optteam, row[0]), 'team':row[1], 'id':row[2]})
+			similar.append({'jaro':jellyfish.jaro_distance(optteam, row[1]), 'team':row[1], 'id':row[2]})
+		# now, we do two "sorts" to find the "top5" matches. reverse is opposite on each.
+		matching = sorted(similar, key=itemgetter('jaro'), reverse=True)[0:5] # bot five.
+		# return matching now.
+		return matching
+
 	def _lookupTeam(self, optteam, opttable=None):
 		"Lookup various strings/variables depending on team."
 
@@ -188,11 +208,15 @@ class CFB(callbacks.Plugin):
 				query = "SELECT %s FROM cfb WHERE team LIKE ?" % opttable
 				cursor.execute(query, ('%'+optteam+'%',))
 				row = cursor.fetchone()
-				if not row:  # we found nothing under either.
-					retrval = None  # bailout.
-				else:  # return teamname.
+				if not row:  # we found nothing under either nickname or team. fuzzy time.
+					st = self._similarTeams(optteam, opttable=opttable)  # get similar teams.
+					if st[0]['jaro'] > 0.75:  # if jaro is > 0.75
+						return st[0]['id']  # we match. return id.
+					else:
+						return st
+				else:  # return teamname from team.
 					retrval = row[0]
-			else:  # return nickname.
+			else:  # return nickname from nn.
 				retrval = row[0]
 		# return.
 		return retrval
@@ -334,10 +358,10 @@ class CFB(callbacks.Plugin):
 		irc.reply("Sorry, command is currently broken!")
 		return
 
-		# first, lookup and make sure we have a valid team.
+		# check the team now.
 		lookupteam = self._lookupTeam(optteam, opttable='usat')
-		if not lookupteam:  # no valid team found.
-			irc.reply("ERROR: I could not find {0} in my database of teams.".format(optteam))
+		if isinstance(lookupteam, list):  # if match no good, list returned. give simmilar teams.
+			irc.reply("ERROR: I could not find team '{0}'. Similar: {1}".format(optteam, " | ".join(sorted([i['team'].title() for i in lookupteam]))))
 			return
 		# build and fetch html.
 		url = self._b64decode('aHR0cDovL3Nwb3J0c2RpcmVjdC51c2F0b2RheS5jb20vZm9vdGJhbGwvbmNhYWYtdGVhbXMuYXNweD9wYWdlPS9kYXRhL25jYWFmL3RlYW1zLw==') + 'team%s.html' % lookupteam
@@ -375,9 +399,9 @@ class CFB(callbacks.Plugin):
 		"""
 
 		# lookup team.
-		lookupteam = self._lookupTeam(optteam)
-		if not lookupteam:
-			irc.reply("ERROR: I could not find {0} in my database of teams.".format(optteam))
+		lookupteam = self._lookupTeam(optteam, opttable='tid')
+		if isinstance(lookupteam, list):  # if match no good, list returned. give simmilar teams.
+			irc.reply("ERROR: I could not find team '{0}'. Similar: {1}".format(optteam, " | ".join(sorted([i['team'].title() for i in lookupteam]))))
 			return
 		# build and fetch url.
 		url = self._b64decode('aHR0cDovL3d3dy5jYnNzcG9ydHMuY29tL2NvbGxlZ2Vmb290YmFsbC90ZWFtcy9wYWdl') + '/%s/' % lookupteam
@@ -717,8 +741,8 @@ class CFB(callbacks.Plugin):
 			return
 		# check the team now.
 		lookupteam = self._lookupTeam(optteam, opttable='eid')
-		if not lookupteam:
-			irc.reply("ERROR: I could not find {0} in my database of teams.".format(optteam))
+		if isinstance(lookupteam, list):  # if match no good, list returned. give simmilar teams.
+			irc.reply("ERROR: I could not find team '{0}'. Similar: {1}".format(optteam, " | ".join(sorted([i['team'].title() for i in lookupteam]))))
 			return
 		# url is conditional because of an odd bug.
 		url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvdGVhbS9zdGF0cy9fL2lkLw==') + '%s' % lookupteam
@@ -781,8 +805,8 @@ class CFB(callbacks.Plugin):
 					return
 		# check the team now.
 		lookupteam = self._lookupTeam(optteam)
-		if not lookupteam:
-			irc.reply("ERROR: I could not find {0} in my database of teams.".format(optteam))
+		if isinstance(lookupteam, list):  # if match no good, list returned. give simmilar teams.
+			irc.reply("ERROR: I could not find team '{0}'. Similar: {1}".format(optteam, " | ".join(sorted([i['team'].title() for i in lookupteam]))))
 			return
 		# build and fetch url.
 		url = self._b64decode('aHR0cDovL3d3dy5jYnNzcG9ydHMuY29tL2NvbGxlZ2Vmb290YmFsbC90ZWFtcy9yb3N0ZXI=') + '/%s/' % lookupteam
@@ -794,6 +818,8 @@ class CFB(callbacks.Plugin):
 			return
 		# process html.
 		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
+		tn = soup.find('div', attrs={'class':'info'}).find('h1').getText(separator=' ')  # teamname.
+		tn = utils.str.normalizeWhitespace(tn)  # clean up teamname.
 		div = soup.find('div', attrs={'class':'spacer10 clearBoth'})
 		table = div.findNext('table', attrs={'class':'data', 'width':'100%'})
 		rows = table.findAll('tr', attrs={'class':re.compile('^row1$|^row2$')})
@@ -823,7 +849,7 @@ class CFB(callbacks.Plugin):
 				irc.reply("I did not find anyone on {0} with roster number: {1}".format(optteam, roster))
 		else:  # just display  the roster.
 			output = [k.upper()+ " :: " + (" ".join(v)) for (k, v) in players.items()]
-			irc.reply("{0} Roster :: {1}".format(self._red(optteam.title()), " | ".join(output)))
+			irc.reply("{0} Roster :: {1}".format(self._red(tn), " | ".join(output)))
 
 	cfbroster = wrap(cfbroster, [(getopts({'position':('somethingWithoutSpaces'), 'number':('somethingWithoutSpaces')})), ('text')])
 
@@ -959,10 +985,10 @@ class CFB(callbacks.Plugin):
 		Ex: Alabama
 		"""
 
-		# lookup team in eid table.
+		# check the team now.
 		lookupteam = self._lookupTeam(optteam, opttable='eid')
-		if not lookupteam:
-			irc.reply("ERROR: I could not find {0} in my database of teams.".format(optteam))
+		if isinstance(lookupteam, list):  # if match no good, list returned. give simmilar teams.
+			irc.reply("ERROR: I could not find team '{0}'. Similar: {1}".format(optteam, " | ".join(sorted([i['team'].title() for i in lookupteam]))))
 			return
 		# build and fetch url.
 		url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvdGVhbS9fL2lk') + '/%s/' % lookupteam
@@ -985,9 +1011,9 @@ class CFB(callbacks.Plugin):
 			date = tds[0].getText()
 			opp = tds[1].getText().replace('&amp;', '&')  # aTm fix.
 			if opp.startswith('vs'):  # replace the vsTeam due to getText()
-				opp = opp.replace('vs', 'v ', 1)  # max 1.
+				opp = opp.replace('vs', '', 1)  # max 1.
 			result = tds[2].getText()
-			append_list.append("{0} - {1} ({2})".format(date, opp, result))
+			append_list.append("{0} - {1} ({2})".format(date, self._bold(opp), result))
 		# output time.
 		output = "{0} :: {1}".format(self._red(team), " | ".join([item for item in append_list]))
 		irc.reply(output)
