@@ -7,11 +7,11 @@
 # my libs
 import os
 import sqlite3
-from BeautifulSoup import BeautifulSoup
-from base64 import b64decode
 import re
 import collections
 import datetime
+from BeautifulSoup import BeautifulSoup
+from base64 import b64decode
 from random import choice
 import jellyfish  # similarteams.
 from operator import itemgetter
@@ -21,11 +21,8 @@ from supybot.commands import *
 import supybot.plugins as plugins
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
-from supybot.i18n import PluginInternationalization, internationalizeDocstring
 
-_ = PluginInternationalization('CFB')
 
-@internationalizeDocstring
 class CFB(callbacks.Plugin):
 	"""Add the help for "@plugin help CFB" here
 	This should describe *how* to use this plugin."""
@@ -40,33 +37,33 @@ class CFB(callbacks.Plugin):
 	# FORMATTING #
 	##############
 
-	def _red(self, string):
+	def _red(self, s):
 		"""Returns a red string."""
-		return ircutils.mircColor(string, 'red')
+		return ircutils.mircColor(s, 'red')
 
-	def _yellow(self, string):
+	def _yellow(self, s):
 		"""Returns a yellow string."""
-		return ircutils.mircColor(string, 'yellow')
+		return ircutils.mircColor(s, 'yellow')
 
-	def _green(self, string):
+	def _green(self, s):
 		"""Returns a green string."""
-		return ircutils.mircColor(string, 'green')
+		return ircutils.mircColor(s, 'green')
 
-	def _blue(self, string):
+	def _blue(self, s):
 		"""Returns a blue string."""
-		return ircutils.mircColor(string, 'blue')
+		return ircutils.mircColor(s, 'blue')
 
-	def _bold(self, string):
+	def _bold(self, s):
 		"""Returns a bold string."""
-		return ircutils.bold(string)
+		return ircutils.bold(s)
 
-	def _ul(self, string):
+	def _ul(self, s):
 		"""Returns an underline string."""
-		return ircutils.underline(string)
+		return ircutils.underline(s)
 
-	def _bu(self, string):
+	def _bu(self, s):
 		"""Returns a bold/underline string."""
-		return ircutils.bold(ircutils.underline(string))
+		return ircutils.bold(ircutils.underline(s))
 
 	######################
 	# INTERNAL FUNCTIONS #
@@ -121,10 +118,10 @@ class CFB(callbacks.Plugin):
 			self.log.error("ERROR opening {0} message: {1}".format(url, e))
 			return None
 
-	def _b64decode(self, string):
+	def _b64decode(self, s):
 		"""Returns base64 encoded string."""
 
-		return b64decode(string)
+		return b64decode(s)
 
 	######################
 	# DATABASE FUNCTIONS #
@@ -253,7 +250,7 @@ class CFB(callbacks.Plugin):
 		"""
 
 		conferences = self._validconfs()
-		irc.reply("Valid CFB Conferences: {0}".format(" | ".join(sorted([item for item in conferences]))))
+		irc.reply("Valid CFB Conferences: {0}".format(" | ".join(sorted([i for i in conferences]))))
 
 	cfbconferences = wrap(cfbconferences)
 
@@ -265,13 +262,13 @@ class CFB(callbacks.Plugin):
 
 		optconf = optconf.upper()
 		if optconf not in self._validconfs():
-			irc.reply("ERROR: Invalid conference. Must be one of: {0}".format(self._validconfs()))
+			irc.reply("ERROR: Invalid conference. Valid: {0}".format(" | ".join(sorted([i for i in self._validconfs()]))))
 			return
 
-		fullconf = self._translateConf(optconf) # needs to be lowercase, which this will return
-		teams = self._validteams(fullconf)
-
-		irc.reply("Valid teams are: %s" % (string.join([ircutils.bold(item.title()) for item in teams], " | "))) # title because all entries are lc.
+		fullconf = self._translateConf(optconf)  # needs to be lowercase, which this will return
+		teams = self._validteams(fullconf)  # grab teams.
+		# title because all entries are lc.
+		irc.reply("Valid teams are: {0}".format(" | ".join(sorted([self._bold(i.title()) for i in teams]))))
 
 	cfbteams = wrap(cfbteams, [('somethingWithoutSpaces')])
 
