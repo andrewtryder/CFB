@@ -1,152 +1,175 @@
-CREATE TABLE cfb (team TEXT,tid TEXT PRIMARY KEY,conf TEXT,nn TEXT,eid INTEGER,usat INTEGER, cfbstats INTEGER, yahoo TEXT);
-/* ACC */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('boston college','BC','atlantic coast','eagles','103','34','67','bbf');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('clemson','CLEM','atlantic coast','tigers','228','128','147','ccl');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('florida state','FSU','atlantic coast','seminoles','52','47','234','ffc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('maryland','MD','atlantic coast','terrapins','120','60','392','mmd');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('north carolina state','NCST','atlantic coast','wolfpack','152','79','490','nnn');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('wake forest','WAKE','atlantic coast','demon deacons','154','138','749','wwa');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('duke','DUKE','atlantic coast','blue devils','150','95','193','ddf');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('georgia tech','GATECH','atlantic coast','yellow jackets','59','125','255','ggc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('miami','MIAMI','atlantic coast','hurricanes','2390','70','415','mmi');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('north carolina','UNC','atlantic coast','tar heels','153','65','457','nnl');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('virginia','UVA','atlantic coast','cavaliers','258','134','746','vvb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('virginia tech','VATECH','atlantic coast','hokies','259','45','742','vvd');
-/* BIG12 */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('baylor','BAYLOR','big 12','bears','239','88','51','bbb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('iowa state','IOWAST','big 12','cyclones','66','101','311','iih');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('kansas','KANSAS','big 12','jayhawks','2305','49','328','kka');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('kansas state','KSTATE','big 12','wildcats','2306','130','327','kkb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('oklahoma','OKLA','big 12','sooners','201','139','522','ooc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('oklahoma state','OKLAST','big 12','cowboys','197','53','521','ood');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('tcu','TCU','big 12','horned frogs','2628','110','698','tta');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('texas','TEXAS','big 12','longhorns','251','131','703','tth');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('texas tech','TXTECH','big 12','red raiders','2641','64','700','tto');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('west virginia','WVU','big 12','mountaineers','277','62','768','wwh');
-/* BIG EAST */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('cincinnati','CINCY','big east','bearcats','2132','46','140','ccj');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('connecticut','UCONN','big east','huskies','41','144','164','ccq');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('louisville','LVILLE','big east','cardinals','97','61','367','llh');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('pittsburgh','PITT','big east','panthers','221','36','545','ppd');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('rutgers','RUT','big east','scarlet knights','164','129','587','rrd');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('south florida','SFLA','big east','bulls','58','204','651','sbn');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('syracuse','CUSE','big east','orange','183','104','688','ssw');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('temple','TEMPLE','big east','owls','218','56','690','ttb');
-/* B1G */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('iowa','IOWA','big ten','hawkeyes','2294','133','312','iig');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('michigan','MICH','big ten','wolverines','130','103','418','mmk');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('michigan state','MICHST','big ten','spartans','127','113','416','mml');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('minnesota','MINN','big ten','golden gophers','135','140','428','mmn');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('nebraska','NEB','big ten','cornhuskers','158','55','463','nnd');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('northwestern','NWEST','big ten','wildcats','77','94','509','nnv');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('illinois','ILL','big ten','fighting illini','356','72','301','iic');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('indiana','IND','big ten','hoosiers','84','107','306','iie');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('ohio state','OHIOST','big ten','buckeyes','194','105','518','oob');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('penn state','PSU','big ten','nittany lions','213','59','539','ppb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('purdue','PURDUE','big ten','boilermakers','2509','35','559','ppj');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('wisconsin','WISC','big ten','badgers','275','111','796','wwo');
-/* CONFUSA */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('east carolina','ECU','conference usa','pirates','151','78','196','eea');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('memphis','MEMP','conference usa','tigers','235','37','404','mmg');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('marshall','MRSHL','conference usa','thundering herd','276','118','388','mmc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('uab','UAB','conference usa','blazers','5','146','9','aaz');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('ucf','UCF','conference usa','knights','2116','142','128','ccf');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('southern mississippi','USM','conference usa','golden eagles','2572','58','664','sso');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('houston','HOU','conference usa','cougars','248','96','288','hhe');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('rice','RICE','conference usa','owls','242','98','574','rrb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('southern methodist','SMU','conference usa','mustangs','2567','73','663','ssh');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('tulane','TULANE','conference usa','green wave','2655','48','718','tts');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('tulsa','TULSA','conference usa','golden hurricane','202','97','719','ttt');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('texas-el paso','UTEP','conference usa','miners','2638','41','704','ttl');
-/* INDEPENDENTS */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('army','ARMY','fbs independents','black knights','349','127','725','aaq');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('brigham young','BYU','fbs independents','cougars','252','33','77','bbi');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('navy','NAVY','fbs independents','midshipmen','2426','66','726','nna');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('notre dame','ND','fbs independents','fighting irish','87','102','513','nnx');
-/* MIDAMERICAN */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('akron','AKRON','mid american','zips','2006','124','5','aac');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('bowling green','BGREEN','mid american','green falcons','189','85','71','bbh');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('buffalo','BUFF','mid american','bulls','2084','145','86','bbp');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('kent state','KENTST','mid american','golden flashes','2309','123','331','kkc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('massachusetts','MA','mid american','minutemen','113','207','400','mme');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('miami (ohio)','MIAOH','mid american','redhawks','193','121','414','mmj');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('ohio','OHIO','mid american','bobcats','195','117','519','ooa');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('ball state','BALLST','mid american','cardinals','2050','86','47','bba');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('central michigan','CMICH','mid american','chippewas','2117','141','129','ccg');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('eastern michigan','EMICH','mid american','eagles','2199','136','204','eef');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('northern illinois','NILL','mid american','huskies','2459','68','503','nns');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('toledo','TOLEDO','mid american','rockets','2649','82','709','ttp');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('western michigan','WMICH','mid american','broncos','2711','67','774','wwl');
-/* MOUNTAIN WEST */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('air force','AF','mountain west','falcons','2005','42','721','aab');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('boise state','BOISE','mountain west','broncos','68','92','66','bbe');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('colorado state','COLOST','mountain west','rams','36','89','156','cco');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('fresno state','FRESNO','mountain west','bulldogs','278','109','96','ffe');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('hawaii','HAWAII','mountain west','warriors','62','50','277','hhc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('nevada','NEVADA','mountain west','wolf pack','2440','135','466','nnf');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('new mexico','NMEX','mountain west','lobos','167','63','473','nnh');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('san diego state','SDGST','mountain west','aztecs','21','132','626','ssb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('unlv','UNLV','mountain west','rebels','2439','108','465','nne');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('wyoming','WYO','mountain west','cowboys','2751','87','811','wwq');
-/* PAC12 */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('california','CAL','pacific 12','golden bears','25','44','107','ccd');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('oregon','OREG','pacific 12','ducks','2483','39','529','ooe');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('oregon state','OREGST','pacific 12','beavers','204','81','528','oof');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('stanford','STNFRD','pacific 12','cardinal','24','106','674','sss');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('washington','WASH','pacific 12','huskies','264','54','756','wwb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('washington state','WASHST','pacific 12','cougars','265','40','754','wwc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('arizona','ARIZ','pacific 12','wildcats','12','83','29','aal');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('arizona state','ARIZST','pacific 12','sun devils','9','112','28','aam');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('colorado','COLO','pacific 12','buffalos','38','90','157','ccn');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('ucla','UCLA','pacific 12','bruins','26','91','110','uua');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('southern california','USC','pacific 12','trojans','30','71','657','uub');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('utah','UTAH','pacific 12','utes','254','93','732','uuc');
-/* SEC */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('florida','FLA','southeastern','gators','57','69','235','ffa');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('georgia','UGA','southeastern','bulldogs','61','52','257','ggb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('kentucky','UK','southeastern','wildcats','96','122','334','kkd');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('missouri','MIZZOU','southeastern','tigers','142','119','434','mms');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('south carolina','SC','southeastern','gamecocks','2579','161','648','ssi');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('tennessee','TENN','southeastern','volunteers','2633','114','694','ttd');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('vanderbilt','VANDY','southeastern','commodores','238','115','736','vva');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('alabama','BAMA','southeastern','crimson tide','333','51','8','aad');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('arkansas','ARK','southeastern','razorbacks','8','126','31','aan');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('auburn','AUBURN','southeastern','tigers','2','84','37','aar');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('lsu','LSU','southeastern','tigers','99','116','365','lli');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('mississippi','MISS','southeastern','rebels','145','77','433','mmo');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('mississippi state','MISSST','southeastern','bulldogs','344','76','430','mmq');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('texas a&m','TXAM','southeastern','aggies','245','120','697','ttj');
-/* SUNBELT */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('arkansas state','ARKST','sun belt','red wolves','2032','75','30','aap');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('florida atlantic','FAU','sun belt','owls','2226','221','229','ffr');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('florida international','FIU','sun belt','golden panthers','2229','230','231','fli');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('la.-lafayette','LALAF','sun belt','ragin cajuns','309','38','671','ssq');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('louisiana-monroe','LAMON','sun belt','warhawks','2433','137','498','nnb');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('middle tennessee','MTSU','sun belt','blue raiders','2393','143','419','mmm');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('north texas','NTEXAS','sun belt','mean green','249','99','497','nnp');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('south alabama','SALA','sun belt','jaguars','6','459','646','sal');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('troy','TROY','sun belt','trojans','2653','196','716','ttv');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('western kentucky','WKY','sun belt','hilltoppers','98','189','772','wwk');
-/* WAC */
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('idaho','IDAHO','western athletic','vandals','70','80','295','iia');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('louisiana tech','LATECH','western athletic','bulldogs','2348','57','366','llg');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('new mexico state','NMEXST','western athletic','aggies','166','74','472','nni');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('san jose state','SJST','western athletic','spartans','23','43','630','ssc');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('texas state','TXSTSM','western athletic','bobcats','326','233','670','ssv');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('utah state','UTAHST','western athletic','aggies','328','100','731','uud');
-insert into cfb (team,tid,conf,nn,eid,usat,cfbstats,yahoo) VALUES ('texas-san antonio','TXSA','western athletic','roadrunners','2636','461','706','tsa');
+/* CFB TEAMS */
+CREATE TABLE cfb (
+    team TEXT, -- college or teamname.
+    tid TEXT PRIMARY KEY, -- http://cbsprt.co/16W3DNl
+    conf TEXT, -- confname.
+    nn TEXT, -- alias name (usually team name)
+    eid INTEGER, -- http://es.pn/130eoIA
+    usat INTEGER, -- http://usat.ly/130ernG
+    cfbstats INTEGER, -- http://bit.ly/130eFLr
+    yahoo TEXT); -- http://bit.ly/130eLmk
 
-/* CONF TABLE */
-CREATE TABLE confs (full TEXT, short TEXT, eid INTEGER);
-insert into confs (full, short, eid) VALUES ('big ten','BIG10','5');
-insert into confs (full, short, eid) VALUES ('atlantic coast','ACC','1');
-insert into confs (full, short, eid) VALUES ('big east','BIGE','10');
-insert into confs (full, short, eid) VALUES ('pacific 12','PAC12','9'); 
-insert into confs (full, short, eid) VALUES ('big 12','BIG12','4');
-insert into confs (full, short, eid) VALUES ('conference usa','USA','12');
-insert into confs (full, short, eid) VALUES ('mid american','MAC','15');
-insert into confs (full, short, eid) VALUES ('fbs independents','IA','18');
-insert into confs (full, short, eid) VALUES ('mountain west','MWC','17');
-insert into confs (full, short, eid) VALUES ('southeastern','SEC','8');
-insert into confs (full, short, eid) VALUES ('sun belt','SUN','37');
-insert into confs (full, short, eid) VALUES ('western athletic','WAC','16');
+/* AAC */
+INSERT INTO cfb VALUES ('cincinnati','CINCY','american athletic','bearcats','2132','46','140','ccj');
+INSERT INTO cfb VALUES ('connecticut','UCONN','american athletic','huskies','41','144','164','ccq');
+INSERT INTO cfb VALUES ('houston','HOU','american athletic','cougars','248','96','288','hhe');
+INSERT INTO cfb VALUES ('louisville','LVILLE','american athletic','cardinals','97','61','367','llh');
+INSERT INTO cfb VALUES ('memphis','MEMP','american athletic','tigers','235','37','404','mmg');
+INSERT INTO cfb VALUES ('rutgers','RUT','american athletic','scarlet knights','164','129','587','rrd');
+INSERT INTO cfb VALUES ('southern methodist','SMU','american athletic','mustangs','2567','73','663','ssh');
+INSERT INTO cfb VALUES ('south florida','SFLA','american athletic','bulls','58','204','651','sbn');
+INSERT INTO cfb VALUES ('temple','TEMPLE','american athletic','owls','218','56','690','ttb');
+INSERT INTO cfb VALUES ('ucf','UCF','american athletic','knights','2116','142','128','ccf');
+/* ACC - ATLANTIC */
+INSERT INTO cfb VALUES ('boston college','BC','atlantic coast','eagles','103','34','67','bbf');
+INSERT INTO cfb VALUES ('clemson','CLEM','atlantic coast','tigers','228','128','147','ccl');
+INSERT INTO cfb VALUES ('florida state','FSU','atlantic coast','seminoles','52','47','234','ffc');
+INSERT INTO cfb VALUES ('maryland','MD','atlantic coast','terrapins','120','60','392','mmd');
+INSERT INTO cfb VALUES ('north carolina state','NCST','atlantic coast','wolfpack','152','79','490','nnn');
+INSERT INTO cfb VALUES ('syracuse','CUSE','atlantic coast','orange','183','104','688','ssw');
+INSERT INTO cfb VALUES ('wake forest','WAKE','atlantic coast','demon deacons','154','138','749','wwa');
+/* ACC - COASTAL */
+INSERT INTO cfb VALUES ('duke','DUKE','atlantic coast','blue devils','150','95','193','ddf');
+INSERT INTO cfb VALUES ('georgia tech','GATECH','atlantic coast','yellow jackets','59','125','255','ggc');
+INSERT INTO cfb VALUES ('miami','MIAMI','atlantic coast','hurricanes','2390','70','415','mmi');
+INSERT INTO cfb VALUES ('north carolina','UNC','atlantic coast','tar heels','153','65','457','nnl');
+INSERT INTO cfb VALUES ('pittsburgh','PITT','atlantic coast','panthers','221','36','545','ppd');
+INSERT INTO cfb VALUES ('virginia','UVA','atlantic coast','cavaliers','258','134','746','vvb');
+INSERT INTO cfb VALUES ('virginia tech','VATECH','atlantic coast','hokies','259','45','742','vvd');
+/* B1G10 - LEADERS */
+INSERT INTO cfb VALUES ('illinois','ILL','big ten','fighting illini','356','72','301','iic');
+INSERT INTO cfb VALUES ('indiana','IND','big ten','hoosiers','84','107','306','iie');
+INSERT INTO cfb VALUES ('ohio state','OHIOST','big ten','buckeyes','194','105','518','oob');
+INSERT INTO cfb VALUES ('penn state','PSU','big ten','nittany lions','213','59','539','ppb');
+INSERT INTO cfb VALUES ('purdue','PURDUE','big ten','boilermakers','2509','35','559','ppj');
+INSERT INTO cfb VALUES ('wisconsin','WISC','big ten','badgers','275','111','796','wwo');
+/* B1G10 - LEGENDS */
+INSERT INTO cfb VALUES ('iowa','IOWA','big ten','hawkeyes','2294','133','312','iig');
+INSERT INTO cfb VALUES ('michigan','MICH','big ten','wolverines','130','103','418','mmk');
+INSERT INTO cfb VALUES ('michigan state','MICHST','big ten','spartans','127','113','416','mml');
+INSERT INTO cfb VALUES ('minnesota','MINN','big ten','golden gophers','135','140','428','mmn');
+INSERT INTO cfb VALUES ('nebraska','NEB','big ten','cornhuskers','158','55','463','nnd');
+INSERT INTO cfb VALUES ('northwestern','NWEST','big ten','wildcats','77','94','509','nnv');
+/* BIG12 */
+INSERT INTO cfb VALUES ('baylor','BAYLOR','big 12','bears','239','88','51','bbb');
+INSERT INTO cfb VALUES ('iowa state','IOWAST','big 12','cyclones','66','101','311','iih');
+INSERT INTO cfb VALUES ('kansas','KANSAS','big 12','jayhawks','2305','49','328','kka');
+INSERT INTO cfb VALUES ('kansas state','KSTATE','big 12','wildcats','2306','130','327','kkb');
+INSERT INTO cfb VALUES ('oklahoma','OKLA','big 12','sooners','201','139','522','ooc');
+INSERT INTO cfb VALUES ('oklahoma state','OKLAST','big 12','cowboys','197','53','521','ood');
+INSERT INTO cfb VALUES ('tcu','TCU','big 12','horned frogs','2628','110','698','tta');
+INSERT INTO cfb VALUES ('texas','TEXAS','big 12','longhorns','251','131','703','tth');
+INSERT INTO cfb VALUES ('texas tech','TXTECH','big 12','red raiders','2641','64','700','tto');
+INSERT INTO cfb VALUES ('west virginia','WVU','big 12','mountaineers','277','62','768','wwh');
+/* CONFUSA - EAST */
+INSERT INTO cfb VALUES ('east carolina','ECU','conference usa','pirates','151','78','196','eea');
+INSERT INTO cfb VALUES ('florida atlantic','FAU','conference usa','owls','2226','221','229','ffr');
+INSERT INTO cfb VALUES ('florida international','FIU','sun belt','golden panthers','2229','230','231','fli');
+INSERT INTO cfb VALUES ('marshall','MRSHL','conference usa','thundering herd','276','118','388','mmc');
+INSERT INTO cfb VALUES ('middle tennessee','MTSU','conference usa','blue raiders','2393','143','419','mmm');
+INSERT INTO cfb VALUES ('southern mississippi','USM','conference usa','golden eagles','2572','58','664','sso');
+INSERT INTO cfb VALUES ('uab','UAB','conference usa','blazers','5','146','9','aaz');
+/* CONFUSA - WEST */
+INSERT INTO cfb VALUES ('louisiana tech','LATECH','conference usa','bulldogs','2348','57','366','llg');
+INSERT INTO cfb VALUES ('north texas','NTEXAS','conference usa','mean green','249','99','497','nnp');
+INSERT INTO cfb VALUES ('rice','RICE','conference usa','owls','242','98','574','rrb');
+INSERT INTO cfb VALUES ('tulane','TULANE','conference usa','green wave','2655','48','718','tts');
+INSERT INTO cfb VALUES ('tulsa','TULSA','conference usa','golden hurricane','202','97','719','ttt');
+INSERT INTO cfb VALUES ('texas-san antonio','TXSA','conference usa','roadrunners','2636','461','706','tsa');
+INSERT INTO cfb VALUES ('texas-el paso','UTEP','conference usa','miners','2638','41','704','ttl');
+/* INDEPENDENTS */
+INSERT INTO cfb VALUES ('army','ARMY','fbs independents','black knights','349','127','725','aaq');
+INSERT INTO cfb VALUES ('brigham young','BYU','fbs independents','cougars','252','33','77','bbi');
+INSERT INTO cfb VALUES ('idaho','IDAHO','fbs independents','vandals','70','80','295','iia');
+INSERT INTO cfb VALUES ('navy','NAVY','fbs independents','midshipmen','2426','66','726','nna');
+INSERT INTO cfb VALUES ('new mexico state','NMEXST','fbs independents','aggies','166','74','472','nni');
+INSERT INTO cfb VALUES ('notre dame','ND','fbs independents','atlantic coast','87','102','513','nnx');
+/* MID-AMERICAN - EAST */
+INSERT INTO cfb VALUES ('akron','AKRON','mid american','zips','2006','124','5','aac');
+INSERT INTO cfb VALUES ('bowling green','BGREEN','mid american','green falcons','189','85','71','bbh');
+INSERT INTO cfb VALUES ('buffalo','BUFF','mid american','bulls','2084','145','86','bbp');
+INSERT INTO cfb VALUES ('kent state','KENTST','mid american','golden flashes','2309','123','331','kkc');
+INSERT INTO cfb VALUES ('massachusetts','MA','mid american','minutemen','113','207','400','mme');
+INSERT INTO cfb VALUES ('miami (ohio)','MIAOH','mid american','redhawks','193','121','414','mmj');
+INSERT INTO cfb VALUES ('ohio','OHIO','mid american','bobcats','195','117','519','ooa');
+/* MID-AMERICAN - WEST */
+INSERT INTO cfb VALUES ('ball state','BALLST','mid american','cardinals','2050','86','47','bba');
+INSERT INTO cfb VALUES ('central michigan','CMICH','mid american','chippewas','2117','141','129','ccg');
+INSERT INTO cfb VALUES ('eastern michigan','EMICH','mid american','eagles','2199','136','204','eef');
+INSERT INTO cfb VALUES ('northern illinois','NILL','mid american','huskies','2459','68','503','nns');
+INSERT INTO cfb VALUES ('toledo','TOLEDO','mid american','rockets','2649','82','709','ttp');
+INSERT INTO cfb VALUES ('western michigan','WMICH','mid american','broncos','2711','67','774','wwl');
+/* MOUNTAIN WEST - MOUNTAIN */
+INSERT INTO cfb VALUES ('air force','AF','mountain west','falcons','2005','42','721','aab');
+INSERT INTO cfb VALUES ('boise state','BOISE','mountain west','broncos','68','92','66','bbe');
+INSERT INTO cfb VALUES ('colorado state','COLOST','mountain west','rams','36','89','156','cco');
+INSERT INTO cfb VALUES ('new mexico','NMEX','mountain west','lobos','167','63','473','nnh');
+INSERT INTO cfb VALUES ('utah state','UTAHST','western athletic','aggies','328','100','731','uud');
+INSERT INTO cfb VALUES ('wyoming','WYO','mountain west','cowboys','2751','87','811','wwq');
+/* MOUNTAIN WEST - WEST */
+INSERT INTO cfb VALUES ('fresno state','FRESNO','mountain west','bulldogs','278','109','96','ffe');
+INSERT INTO cfb VALUES ('hawaii','HAWAII','mountain west','warriors','62','50','277','hhc');
+INSERT INTO cfb VALUES ('nevada','NEVADA','mountain west','wolf pack','2440','135','466','nnf');
+INSERT INTO cfb VALUES ('san diego state','SDGST','mountain west','aztecs','21','132','626','ssb');
+INSERT INTO cfb VALUES ('san jose state','SJST','mountain west','spartans','23','43','630','ssc');
+INSERT INTO cfb VALUES ('unlv','UNLV','mountain west','rebels','2439','108','465','nne');
+/* PAC-12 - NORTH */
+INSERT INTO cfb VALUES ('california','CAL','pacific 12','golden bears','25','44','107','ccd');
+INSERT INTO cfb VALUES ('oregon','OREG','pacific 12','ducks','2483','39','529','ooe');
+INSERT INTO cfb VALUES ('oregon state','OREGST','pacific 12','beavers','204','81','528','oof');
+INSERT INTO cfb VALUES ('stanford','STNFRD','pacific 12','cardinal','24','106','674','sss');
+INSERT INTO cfb VALUES ('washington','WASH','pacific 12','huskies','264','54','756','wwb');
+INSERT INTO cfb VALUES ('washington state','WASHST','pacific 12','cougars','265','40','754','wwc');
+/* PAC-12 - SOUTH */
+INSERT INTO cfb VALUES ('arizona','ARIZ','pacific 12','wildcats','12','83','29','aal');
+INSERT INTO cfb VALUES ('arizona state','ARIZST','pacific 12','sun devils','9','112','28','aam');
+INSERT INTO cfb VALUES ('colorado','COLO','pacific 12','buffalos','38','90','157','ccn');
+INSERT INTO cfb VALUES ('ucla','UCLA','pacific 12','bruins','26','91','110','uua');
+INSERT INTO cfb VALUES ('southern california','USC','pacific 12','trojans','30','71','657','uub');
+INSERT INTO cfb VALUES ('utah','UTAH','pacific 12','utes','254','93','732','uuc');
+/* SUNBELT */
+INSERT INTO cfb VALUES ('arkansas state','ARKST','sun belt','red wolves','2032','75','30','aap');
+INSERT INTO cfb VALUES ('georgia state','GAST','sun belt','panthers','2247','','','gag');
+INSERT INTO cfb VALUES ('la.-lafayette','LALAF','sun belt','ragin cajuns','309','38','671','ssq');
+INSERT INTO cfb VALUES ('louisiana-monroe','LAMON','sun belt','warhawks','2433','137','498','nnb');
+INSERT INTO cfb VALUES ('south alabama','SALA','sun belt','jaguars','6','459','646','sal');
+INSERT INTO cfb VALUES ('texas state','TXSTSM','western athletic','bobcats','326','233','670','ssv');
+INSERT INTO cfb VALUES ('troy','TROY','sun belt','trojans','2653','196','716','ttv');
+INSERT INTO cfb VALUES ('western kentucky','WKY','sun belt','hilltoppers','98','189','772','wwk');
+/* SEC - EAST */
+INSERT INTO cfb VALUES ('florida','FLA','southeastern','gators','57','69','235','ffa');
+INSERT INTO cfb VALUES ('georgia','UGA','southeastern','bulldogs','61','52','257','ggb');
+INSERT INTO cfb VALUES ('kentucky','UK','southeastern','wildcats','96','122','334','kkd');
+INSERT INTO cfb VALUES ('missouri','MIZZOU','southeastern','tigers','142','119','434','mms');
+INSERT INTO cfb VALUES ('south carolina','SC','southeastern','gamecocks','2579','161','648','ssi');
+INSERT INTO cfb VALUES ('tennessee','TENN','southeastern','volunteers','2633','114','694','ttd');
+INSERT INTO cfb VALUES ('vanderbilt','VANDY','southeastern','commodores','238','115','736','vva');
+/* SEC - WEST */
+INSERT INTO cfb VALUES ('alabama','BAMA','southeastern','crimson tide','333','51','8','aad');
+INSERT INTO cfb VALUES ('arkansas','ARK','southeastern','razorbacks','8','126','31','aan');
+INSERT INTO cfb VALUES ('auburn','AUBURN','southeastern','tigers','2','84','37','aar');
+INSERT INTO cfb VALUES ('lsu','LSU','southeastern','tigers','99','116','365','lli');
+INSERT INTO cfb VALUES ('mississippi','MISS','southeastern','rebels','145','77','433','mmo');
+INSERT INTO cfb VALUES ('mississippi state','MISSST','southeastern','bulldogs','344','76','430','mmq');
+INSERT INTO cfb VALUES ('texas a&m','TXAM','southeastern','aggies','245','120','697','ttj');
+
+/* http://www.fbschedules.com/ncaa/2013-college-football-schedules.php */
+
+/* CONFERENCES TABLE */
+CREATE TABLE confs (
+    full TEXT,  -- full name.
+    short TEXT,  -- abbr.
+    eid INTEGER PRIMARY KEY -- unique EID.
+    );
+/* ONE PER CONFERENCE */
+INSERT INTO confs VALUES ('american athletic', 'AAC', '10');
+INSERT INTO confs VALUES ('atlantic coast','ACC','1');
+INSERT INTO confs VALUES ('big ten','BIG10','5');
+INSERT INTO confs VALUES ('big 12','BIG12','4');
+INSERT INTO confs VALUES ('pacific 12','PAC12','9');
+INSERT INTO confs VALUES ('conference usa','USA','12');
+INSERT INTO confs VALUES ('mid american','MAC','15');
+INSERT INTO confs VALUES ('fbs independents','IA','18');
+INSERT INTO confs VALUES ('mountain west','MWC','17');
+INSERT INTO confs VALUES ('southeastern','SEC','8');
+INSERT INTO confs VALUES ('sun belt','SUN','37');
