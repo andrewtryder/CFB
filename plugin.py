@@ -198,25 +198,38 @@ class CFB(callbacks.Plugin):
 
 		with sqlite3.connect(self._cfbdb) as conn:
 			cursor = conn.cursor()  # first check nicenames.
-			query = "SELECT %s FROM cfb WHERE nn LIKE ?" % opttable
-			cursor.execute(query, ('%'+optteam+'%',)) # can't parimeter sub tablenames.
+			# first, we try direct matches, then LIKE with %, then fuzzy.
+			query = "SELECT %s FROM cfb WHERE nn=?" % opttable
+			cursor.execute(query, (optteam,))
 			row = cursor.fetchone()
-			if not row:  # no nickname. check teamname.
-				query = "SELECT %s FROM cfb WHERE team LIKE ?" % opttable
-				cursor.execute(query, ('%'+optteam+'%',))
+			if row:  # found team via nn.
+				retval = row[0]
+			else:  # did not fid directly via nn. check team approx.
+				query = 'SELECT %s FROM cfb WHERE team=?' % opttable
+				cursor.execute(query, (optteam,))
 				row = cursor.fetchone()
-				if not row:  # we found nothing under either nickname or team. fuzzy time.
-					st = self._similarTeams(optteam, opttable=opttable)  # get similar teams.
-					if st[0]['jaro'] > 0.75:  # if jaro is > 0.75
-						return st[0]['id']  # we match. return id.
-					else:
-						return st
-				else:  # return teamname from team.
-					retrval = row[0]
-			else:  # return nickname from nn.
-				retrval = row[0]
-		# return.
-		return retrval
+				if row:  # found via team = directly.
+					retval = row[0]
+				else:  # did not find via approx matches. try via 'like'.
+					query = "SELECT %s FROM cfb WHERE nn LIKE ?" % opttable
+					cursor.execute(query, ('%'+optteam+'%',))
+					row = cursor.fetchone()
+					if row:  # we found via nn LIKE.
+						retval = row[0]
+					else:  # did not find via nn like. Check teamname LIKE.
+						query = "SELECT %s FROM cfb WHERE team LIKE ?" % opttable
+						cursor.execute(query, ('%'+optteam+'%',))
+						row = cursor.fetchone()
+						if row:  # matched a team via LIKE.
+							retval = row[0]
+						else:  # we found nothing via approx matching. our last hope is going fuzzy with jaro.
+							st = self._similarTeams(optteam, opttable=opttable)  # get similar teams.
+							if st[0]['jaro'] > 0.75:  # if jaro is > 0.75
+								retval = st[0]['id']  # we match. return id.
+							else:  # we finally bail. return the jaro matches for display.
+								retval = st
+		# finally, return.
+		return retval
 
 	####################
 	# PUBLIC FUNCTIONS #
