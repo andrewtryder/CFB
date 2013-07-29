@@ -387,7 +387,7 @@ class CFB(callbacks.Plugin):
 	def cfbplayerinfo(self, irc, msg, args, optplayer):
 		"""<player name>
 
-		Fetch gamestats for player from current or past game.
+		Fetch player info/bio information.
 		Ex: aj mccarron
 		"""
 
