@@ -83,7 +83,8 @@ INSERT INTO cfb VALUES ('brigham young','BYU','fbs independents','cougars','252'
 INSERT INTO cfb VALUES ('idaho','IDAHO','fbs independents','vandals','70','80','295','iia');
 INSERT INTO cfb VALUES ('navy','NAVY','fbs independents','midshipmen','2426','66','726','nna');
 INSERT INTO cfb VALUES ('new mexico state','NMEXST','fbs independents','aggies','166','74','472','nni');
-INSERT INTO cfb VALUES ('notre dame','ND','fbs independents','atlantic coast','87','102','513','nnx');
+INSERT INTO cfb VALUES ('notre dame','ND','fbs independents','irish','87','102','513','nnx');
+/* INSERT INTO cfb VALUES ('old dominion','','fbs independents','monarchs','295','','','oah'); */
 /* MID-AMERICAN - EAST */
 INSERT INTO cfb VALUES ('akron','AKRON','mid american','zips','2006','124','5','aac');
 INSERT INTO cfb VALUES ('bowling green','BGREEN','mid american','green falcons','189','85','71','bbh');
