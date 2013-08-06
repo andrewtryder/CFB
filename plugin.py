@@ -772,15 +772,16 @@ class CFB(callbacks.Plugin):
 		# now, process html data in the tables, each poll has its own. polls[string] = [teams].
 		for table in tables:
 			ul = table.find('ul')  # all teams are in a ul
-			poll = table.find('div', attrs={'class':'hd'})  # poll's name hidden in here. replace text below.
-			poll = poll.getText()  # replace text below to mate up keys.
-			poll = poll.replace('AP Top 25', 'ap').replace('USA Today', 'usatoday').replace('Bowl Champ. Series', 'bcs')
-			lis = ul.findAll('li')  # each li in table = teams.
-			for li in lis:  # enumerate through each team.
-				if li.find('span'):  # do some cleaning up. rank is contained in span.
-					li.span.extract()  # remove it if found.
-				team = li.getText().replace('&amp;', '&')  # aTm fix.
-				polls[poll].append(team)  # finally, append to our defaultdict.
+			if ul:  # during the offseason, these won't be present in all polls.
+				poll = table.find('div', attrs={'class':'hd'})  # poll's name hidden in here. replace text below.
+				poll = poll.getText()  # replace text below to mate up keys.
+				poll = poll.replace('AP Top 25', 'ap').replace('USA Today', 'usatoday').replace('Bowl Champ. Series', 'bcs')
+				lis = ul.findAll('li')  # each li in table = teams.
+				for li in lis:  # enumerate through each team.
+					if li.find('span'):  # do some cleaning up. rank is contained in span.
+						li.span.extract()  # remove it if found.
+					team = li.getText().replace('&amp;', '&')  # aTm fix.
+					polls[poll].append(team)  # finally, append to our defaultdict.
 		# output time.
 		if optinput:  # if we have a teamname not poll.
 			# matchingteams = [q for q, item in enumerate(x) if re.search(optinput, item, re.I)]
@@ -796,8 +797,11 @@ class CFB(callbacks.Plugin):
 			else:
 				irc.reply("ERROR: I did not find anything matching '{0}' in the AP, BCS or USA Today polls.".format(optinput))
 		else:  # just display the poll.
-			output = " ".join([(str(i+1) + ". " + j) for i, j in enumerate(polls[optpoll])])  # listcmp + rank.
-			irc.reply("{0} :: {1} :: {2}".format(self._red(optpoll.upper()), self._bold(heading), output))
+			if len(polls[optpoll]) == 0:
+				irc.reply("{0} :: No poll data yet.".format(self._red(optpoll.upper())))
+			else:
+				output = " ".join([(str(i+1) + ". " + j) for i, j in enumerate(polls[optpoll])])  # listcmp + rank.
+				irc.reply("{0} :: {1} :: {2}".format(self._red(optpoll.upper()), self._bold(heading), output))
 
 	cfbrankings = wrap(cfbrankings, [('text')])
 
