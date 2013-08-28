@@ -710,21 +710,25 @@ class CFB(callbacks.Plugin):
 			irc.reply("Something broke heavily formatting on powerrankings page.")
 			return
 		# go about regular html business.
-		datehead = soup.find('div', attrs={'class':'date floatleft'}).getText(separator=' ')
+		#datehead = soup.find('div', attrs={'class':'date floatleft'}).getText(separator=' ')
 		table = soup.find('table', attrs={'class':'tablehead'})
 		headline = table.find('tr', attrs={'class':'stathead'}).getText()
-		rows = table.findAll('tr', attrs={'class':re.compile('^oddrow|^evenrow')})
+		rows = table.findAll('tr', attrs={'class':re.compile('oddrow|evenrow')})
+		#self.log.info("rows {0}".format(rows))
 		# list for each team.
 		powerrankings = []
 		# each row is a team.
 		for row in rows: # one row per team.
 			tds = row.findAll('td') # findall tds.
-			if len(tds) == 5:  # bad row like "Others getting votes.". ugly but works.
-				rank = tds[0].getText() # rank number.
-				team = tds[1].find('div', attrs={'style':'padding: 10px;'}).findAll('a')[1].getText() # 2nd link text.
-				team = team.replace('&amp;', '&')  # for aTm.
-				lastweek = tds[2].find('span', attrs={'class':'pr-last'}).getText()
-				lastweek = lastweek.replace('Last Week:', '').strip() # rank #
+			if len(tds) == 1:  # this is so we skip the last row like "Others receiving votes".
+				continue
+			rank = tds[0].getText() # rank number.
+			team = tds[1].find('div', attrs={'style':'padding: 10px;'}).findAll('a')
+			team = team[1].getText().replace('&amp;', '&') # 2nd link text.
+			# we're here if we should process the good lines.
+			lastweek = tds[2].find('span', attrs={'class':'pr-last'})
+			if lastweek:
+				lastweek = lastweek.getText().replace('Last Week:', '').strip() # rank #
 				# check if we're up or down and insert a symbol.
 				if lastweek == "NR":
 					symbol = self._green('▲')
@@ -734,11 +738,13 @@ class CFB(callbacks.Plugin):
 					symbol = self._red('▼')
 				else: # - if the same.
 					symbol = "-"
-				# now add the rows to our data structures.
+				# now add.
 				powerrankings.append("{0}. {1} (prev: {2} {3})".format(rank, team, symbol, lastweek))
-
+			else:  # lastweek not found (preseason)
+				powerrankings.append("{0}. {1}".format(rank, team))
 		# now output. conditional if we have the team or not.
-		irc.reply("{0} :: {1}".format(self._blue(headline), datehead))
+		#irc.reply("{0} :: {1}".format(self._blue(headline), datehead))
+		irc.reply("{0}".format(self._blue(headline)))
 		for splice in self._splicegen('380', powerrankings):
 			irc.reply(" | ".join([powerrankings[item] for item in splice]))
 
