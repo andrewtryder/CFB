@@ -113,7 +113,8 @@ class CFB(callbacks.Plugin):
 			if h and d:
 				page = utils.web.getUrl(url, headers=h, data=d)
 			else:
-				page = utils.web.getUrl(url)
+				h = {"User-Agent":"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0"}
+				page = utils.web.getUrl(url, headers=h)
 			return page
 		except utils.web.Error as e:
 			self.log.error("ERROR opening {0} message: {1}".format(url, e))
@@ -486,8 +487,7 @@ class CFB(callbacks.Plugin):
 			return
 		# we find teamstats here.
 		tscontent = tsh4.findNext('table', attrs={'class':'mod-data'})  # table for teamstats.
-		tshead = tscontent.find('thead')  # find the thead.
-		tsteams = tshead.findAll('th', attrs={'nowrap':'nowrap'})  # find the 2x TH with teams.
+		tsteams = tscontent.findAll('th', attrs={'nowrap':'nowrap'})  # find the 2x TH with teams.
 		teams = {}  # teams container
 		for i, tsteam in enumerate(tsteams):  # iterate over these two.
 			teams[i] = tsteam.getText().replace('&amp;', '&')  # inject into the dict.
