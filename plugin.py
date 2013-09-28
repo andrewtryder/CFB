@@ -954,6 +954,10 @@ class CFB(callbacks.Plugin):
 		Ex: Alabama or --number 63 Alabama --position QB Alabama
 		"""
 
+		# broken :[
+		irc.reply("Sorry, cfbroster is broken.")
+		return
+
 		# handle optlist --getopts here for position and number.
 		position, roster = None, None
 		for (option, arg) in optlist:
@@ -983,6 +987,7 @@ class CFB(callbacks.Plugin):
 			self.log.error("ERROR opening {0}".format(url))
 			return
 		# process html.
+		self.log.info(str(html))
 		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
 		tn = soup.find('div', attrs={'class':'info'}).find('h1').getText(separator=' ')  # teamname.
 		tn = utils.str.normalizeWhitespace(tn)  # clean up teamname.
