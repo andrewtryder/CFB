@@ -1038,7 +1038,7 @@ class CFB(callbacks.Plugin):
 			return
 		# process html.
 		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
-		div = soup.find('div', attrs={'class':'hw-module'})
+		div = soup.findAll('div', attrs={'class':'hw-module'})[1]
 		h2 = div.find('h2').getText()
 		date = div.find('div', attrs={'class':'hw-module-date'}).getText()
 		table = div.find('table', attrs={'class':'tablehead'})
