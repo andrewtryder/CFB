@@ -1024,6 +1024,44 @@ class CFB(callbacks.Plugin):
 
 	cfbroster = wrap(cfbroster, [(getopts({'position':('somethingWithoutSpaces'), 'number':('somethingWithoutSpaces')})), ('text')])
 
+	def cfbheismanvoting(self, irc, msg, args, optyear):
+		"""<year>
+
+		Display historical voting for the Heisman Trophy.
+		Works for <year> 1935 - current season.
+		"""
+
+		# fetch url and return html.
+		url = self._b64decode('aHR0cDovL3d3dy5zcG9ydHMtcmVmZXJlbmNlLmNvbS9jZmIvYXdhcmRzL2hlaXNtYW4t') + str(optyear) + '.html'
+		html = self._httpget(url)
+		if not html:
+			irc.reply("ERROR: Failed to fetch {0}.".format(url))
+			self.log.error("ERROR opening {0}".format(url))
+			return
+		# process html.
+		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
+		table = soup.find('table', attrs={'id':'heisman'})
+		if not table:
+			irc.reply("ERROR: I could not find Heisman voting for year: {0}. Make sure year is between 1935-current year".format(optyear))
+			return
+		# container for output
+		voting = []
+		# find all of our rows
+		rows = table.findAll('tr')[1:]
+		# process each row.
+		for row in rows:
+			tds = row.findAll('td')
+			name = tds[1].getText()
+			school = tds[2].getText()
+			year = tds[3].getText()
+			pos = tds[4].getText()
+			tot = tds[8].getText()  # adds to dict below.
+			voting.append("{0} Col: {1} Class: {2} POS: {3} Tot: {4}".format(self._ul(name), self._bold(school), self._bold(year), self._bold(pos), self._bold(tot)))
+		# now lets prepare to output.
+		irc.reply("{0} Heisman Trophy Voting :: {1}".format(self._red(optyear), " | ".join([i for i in voting])))
+
+	cfbheismanvoting = wrap(cfbheismanvoting, [('int')])
+
 	def cfbheisman(self, irc, msg, args):
 		"""
 		Display poll results on Heisman voting.
