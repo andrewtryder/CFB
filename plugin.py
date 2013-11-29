@@ -1024,6 +1024,62 @@ class CFB(callbacks.Plugin):
 
 	cfbroster = wrap(cfbroster, [(getopts({'position':('somethingWithoutSpaces'), 'number':('somethingWithoutSpaces')})), ('text')])
 
+	def cfbcoachsalary(self, irc, msg, args, optcoach):
+		"""<school/coach>
+
+		Display a salary for a college football coach from the USAT table.
+		Issue with school or coach name to display a specific one.
+		Ex: Saban OR Alabama
+		"""
+
+		# fetch url and return html.
+		url = self._b64decode('aHR0cDovL3d3dy51c2F0b2RheS5jb20vc3BvcnRzL2NvbGxlZ2Uvc2FsYXJpZXMvbmNhYWYvY29hY2gv')
+		html = self._httpget(url)
+		if not html:
+			irc.reply("ERROR: Failed to fetch {0}.".format(url))
+			self.log.error("ERROR opening {0}".format(url))
+			return
+		# so this is kinda nasty but it works..
+		def everything_between(text, begin, end):
+			idx1=text.find(begin)
+			idx2=text.find(end,idx1)
+			return text[idx1+len(begin):idx2].strip()
+		# have to scrape out things between because of horrible html.
+		rawtable = everything_between(html, '<table class="sort custom-sort ribbonfx" border="0" cellspacing="0" cellpadding="0">', '</table>')
+		# now we go back to doing things normally.
+		soup = BeautifulSoup(rawtable, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
+		# container for output.
+		salaries = []
+		# now process the table.
+		rows = soup.findAll('tr')[1:]  # skip header row.
+		for ff, row in enumerate(rows):
+			tds = [i for i in row.findAll('td')]
+			rank = tds[0].getText()
+			school = tds[1].getText().replace('&amp;', '&')
+			#conf = tds[2].getText()
+			coach = tds[3].getText()
+			salary = tds[4].getText()
+			cs = "{0} - {1} - {2}".format(school, coach, salary)
+			# insert.
+			salaries.append(cs)
+		# now, determine how to output.
+		if not optcoach:  # just display the top10.
+			o = [v for v in salaries[0:9]]
+			irc.reply("{0} :: {1}".format(self._red("Top10 CFB Coach Salaries"), " | ".join(o)))
+		else:  # optcoach so lets search.
+			output = []
+			for v in salaries:
+				if optcoach in v.lower():  # matched.
+					output.append(v)
+			# now determine if we found any.
+			if len(output) == 0:
+				irc.reply("ERROR: I could not find any matching coaches/schools for: {0}".format(optcoach))
+				return
+			else:  # we did match. output.
+				irc.reply("{0}".format(" | ".join(output)))
+
+	cfbcoachsalary = wrap(cfbcoachsalary, [optional('text')])
+
 	def cfbheismanvoting(self, irc, msg, args, optyear):
 		"""<year>
 
