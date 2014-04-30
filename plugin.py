@@ -233,6 +233,65 @@ class CFB(callbacks.Plugin):
 		# finally, return.
 		return retval
 
+    #############
+    # PLAYER DB #
+    #############
+
+	def _eplayerfind(self, pname):
+		"""Find a player's page via google ajax.."""
+
+		# construct url (properly escaped)
+		pname = "%s site:espn.go.com/college-football/player/" % pname
+		url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=8&q=%s" % pname.replace(' ', '%20')
+		# now fetch url.
+		html = self._httpget(url)
+		if not html:
+			irc.reply("ERROR: Failed to fetch {0}.".format(url))
+			self.log.error("ERROR opening {0}".format(url))
+			return
+		# load the json.
+		jsonf = json.loads(html)
+		# make sure status is 200.
+		if jsonf['responseStatus'] != 200:
+			return None
+		# make sure we have results.
+		results = jsonf['responseData']['results']
+		if len(results) == 0:
+			return None
+		# finally, return the url.
+		url = results[0]['url']
+		return url
+
+	def cfbplayerinfo(self, irc, msg, args, optplayer):
+		"""<player name>
+
+		Fetch player info/bio information.
+		Ex: aj mccarron
+		"""
+
+		# try and grab a player.
+		url = self._eplayerfind(optplayer)
+		if not url:
+			irc.reply("ERROR: I could not find a player page for: {0}".format(optplayer))
+			return
+		# we do have url now. fetch it.
+		html = self._httpget(url)
+		if not html:
+			irc.reply("ERROR: Failed to fetch {0}.".format(url))
+			self.log.error("ERROR opening {0}".format(url))
+			return
+		# process html.
+		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
+		playerdiv = soup.find('div', attrs={'class':'mod-content'})
+		if not playerdiv:
+			irc.reply("ERROR: I could not parse {0} for player info.".format(url))
+			return
+		# ok we did get player info. output.
+		playerinfo = playerdiv.find('div', attrs={'class':'player-bio'}).getText(separator=' ')
+		irc.reply("{0}".format(playerinfo))
+
+	cfbplayerinfo = wrap(cfbplayerinfo, [('text')])
+
 	####################
 	# PUBLIC FUNCTIONS #
 	####################
@@ -388,61 +447,6 @@ class CFB(callbacks.Plugin):
 		irc.reply("{0}".format(choice(append_list)))
 
 	spurrier = wrap(spurrier)
-
-	def _eplayerfind(self, pname):
-		"""Find a player's page via google ajax.."""
-
-		# construct url (properly escaped)
-		pname = "%s site:espn.go.com/college-football/player/" % pname
-		url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=8&q=%s" % pname.replace(' ', '%20')
-		# now fetch url.
-		html = self._httpget(url)
-		if not html:
-			irc.reply("ERROR: Failed to fetch {0}.".format(url))
-			self.log.error("ERROR opening {0}".format(url))
-			return
-		# load the json.
-		jsonf = json.loads(html)
-		# make sure status is 200.
-		if jsonf['responseStatus'] != 200:
-			return None
-		# make sure we have results.
-		results = jsonf['responseData']['results']
-		if len(results) == 0:
-			return None
-		# finally, return the url.
-		url = results[0]['url']
-		return url
-
-	def cfbplayerinfo(self, irc, msg, args, optplayer):
-		"""<player name>
-
-		Fetch player info/bio information.
-		Ex: aj mccarron
-		"""
-
-		# try and grab a player.
-		url = self._eplayerfind(optplayer)
-		if not url:
-			irc.reply("ERROR: I could not find a player page for: {0}".format(optplayer))
-			return
-		# we do have url now. fetch it.
-		html = self._httpget(url)
-		if not html:
-			irc.reply("ERROR: Failed to fetch {0}.".format(url))
-			self.log.error("ERROR opening {0}".format(url))
-			return
-		# process html.
-		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
-		playerdiv = soup.find('div', attrs={'class':'mod-content'})
-		if not playerdiv:
-			irc.reply("ERROR: I could not parse {0} for player info.".format(url))
-			return
-		# ok we did get player info. output.
-		playerinfo = playerdiv.find('div', attrs={'class':'player-bio'}).getText(separator=' ')
-		irc.reply("{0}".format(playerinfo))
-
-	cfbplayerinfo = wrap(cfbplayerinfo, [('text')])
 
 	def cfbgamestats(self, irc, msg, args, optteam):
 		"""<team>
