@@ -250,13 +250,33 @@ class CFB(callbacks.Plugin):
 
 	def cfbcountdown(self, irc, msg, args):
 		"""
-		Display the time until the next NFL season starts.
+		Display time until the next CFB Season.
 		"""
 
-		dDelta = datetime.datetime(2014, 8, 29, 19, 0) - datetime.datetime.now()
-		irc.reply("There are {0} days {1} hours {2} minutes {3} seconds until the start of the 2014 College Football Season.".format(\
-											dDelta.days, dDelta.seconds/60/60, dDelta.seconds/60%60, dDelta.seconds%60))
-
+		now = datetime.datetime.today()
+		ny = now.year
+		base = datetime.datetime(ny, 9, 1)
+		base = base-datetime.timedelta(days=1)  # go back one day to the last day of August.
+		# base is now always August 31 of the current year. We figure out what day of the week it is.
+		wd = base.weekday()
+		# do some timedelta math.
+		if wd == 0: ma = 5
+		elif wd == 1: ma = 4
+		elif wd == 2: ma = 5
+		elif wd == 3: ma = 6
+		elif wd == 4: ma = 1
+		elif wd == 5: ma = 2
+		elif wd == 6: ma = 3
+		# now lets take ma and timedelta. this should be kickoff date unless there is something that pushes it like in 2013.
+		kod = base-datetime.timedelta(days=+(ma))  # date itself. we turn it into localtime below.
+		kot = datetime.datetime(kod.year, kod.month, kod.day, 19, 30)  # if not run in Eastern, it's off. im not doing timezones.
+		# did the kickoff date already pass?
+		if kod < now:  # it passed. this will reset when the year passes.
+			irc.reply("Sorry, the kickoff date for the {0} CFB Season has already passed.".format(now.year))
+		else:  # has not passed. do some math.
+			hl = kot-now
+			irc.reply("There are {0} days, {1} hours, {2} mins, {3} seconds until the start of the {4} CFB Season".format(hl.days, hl.seconds/60/60, hl.seconds/60%60, hl.seconds%60, now.year))
+	
 	cfbcountdown = wrap(cfbcountdown)
 
 	def cfbconferences(self, irc, msg, args):
