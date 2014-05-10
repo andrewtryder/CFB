@@ -287,8 +287,9 @@ class CFB(callbacks.Plugin):
 			irc.reply("ERROR: I could not parse {0} for player info.".format(url))
 			return
 		# ok we did get player info. output.
+		pname = playerdiv.find('h1').getText().encode('utf-8')
 		playerinfo = playerdiv.find('div', attrs={'class':'player-bio'}).getText(separator=' ')
-		irc.reply("{0}".format(playerinfo))
+		irc.reply("{0} :: {1}".format(self._red(pname), playerinfo))
 
 	cfbplayerinfo = wrap(cfbplayerinfo, [('text')])
 
