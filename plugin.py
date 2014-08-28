@@ -329,7 +329,7 @@ class CFB(callbacks.Plugin):
 		elif wd == 6: ma = 3
 		# now lets take ma and timedelta. this should be kickoff date unless there is something that pushes it like in 2013.
 		kod = base-datetime.timedelta(days=+(ma))  # date itself. we turn it into localtime below.
-		kot = datetime.datetime(kod.year, kod.month, kod.day, 19, 30)  # if not run in Eastern, it's off. im not doing timezones.
+		kot = datetime.datetime(kod.year, kod.month, kod.day, 18, 01)  # if not run in Eastern, it's off. im not doing timezones.
 		# did the kickoff date already pass?
 		if kod < now:  # it passed. this will reset when the year passes.
 			irc.reply("Sorry, the kickoff date for the {0} CFB Season has already passed.".format(now.year))
