@@ -448,6 +448,64 @@ class CFB(callbacks.Plugin):
 		irc.reply("{0}".format(choice(append_list)))
 
 	spurrier = wrap(spurrier)
+	
+	def cfbtv(self, irc, msg, args, optteam):
+		"""<team>
+		
+		Try and see if we can locate what channel is broadcasting
+		a team's game. Only works for current week.
+		"""
+
+		url = 'http://lsufootball.net/tvschedule.htm'
+		# build and fetch url.
+		html = self._httpget(url)
+		if not html:
+			irc.reply("ERROR: Failed to fetch {0}.".format(url))
+			self.log.error("ERROR opening {0}".format(url))
+			return
+			# process html.
+		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
+		table = soup.find('table', attrs={'class':'tabdata cellBorders'})
+		if not table:
+			irc.reply("Something broke on {0}".format(url))
+			return
+		# container.
+		tv = {}
+		# rows.
+		rows = table.findAll('tr')
+		for row in rows[0:60]:  # iterate over all.
+			tds = row.findAll('td')
+			# we only want len(3)
+			if len(tds) == 3:
+				d = row.findPrevious('tr', attrs={'bgcolor':'FFFFFF'})
+				# find the previous "center"
+				if not d:  # bail if none.
+					continue
+				tms = tds[0].getText().encode('utf-8').replace('&amp;', '&')
+				# split teams on ' at '
+				try:
+					tm1, tm2 = tms.split(' at ', 1)
+				except:  # just abort if this fucks up.
+					continue
+				ct = tds[1].getText().encode('utf-8').replace('.', '')
+				nw = tds[2].getText().encode('utf-8').replace('/', '')
+				# check if it is within a week.
+				os = "{0} {1} {2} {3}".format(d.getText().encode('utf-8'), ct, tms, nw)
+				if tm1 not in tv:
+					tv[tm1.lower()] = os
+				else:
+					self.log.info("{0} was not put into TV {1}".format(tm1, os))
+				if tm2 not in tv:
+					tv[tm2.lower()] = os
+		# now lets try and match.
+		optteam = optteam.lower()  # lower.
+		# match.
+		if optteam in tv:
+			irc.reply("{0}".format(tv[optteam]))
+		else:
+			irc.reply("Sorry, I didn't see {0} on {1}".format(optteam, url))
+
+	cfbtv = wrap(cfbtv, [('text')])
 
 	def cfbgamestats(self, irc, msg, args, optteam):
 		"""<team>
