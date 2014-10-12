@@ -9,6 +9,9 @@ from supybot.test import *
 
 class CFBTestCase(PluginTestCase):
     plugins = ('CFB',)
+    
+    def testCFB(self):
+        self.assertNotError('cfbarrests')
 
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=79:
