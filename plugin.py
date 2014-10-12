@@ -845,64 +845,6 @@ class CFB(callbacks.Plugin):
 
 	cfbweeklyleaders = wrap(cfbweeklyleaders)
 
-	def cfbpowerrankings(self, irc, msg, args):
-		"""
-		Display this week's CFB Power Rankings.
-		"""
-
-		# build and fetch url.
-		url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvcG93ZXJyYW5raW5ncw==')
-		html = self._httpget(url)
-		if not html:
-			irc.reply("ERROR: Failed to fetch {0}.".format(url))
-			self.log.error("ERROR opening {0}".format(url))
-			return
-		# process html.
-		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
-		if not soup.find('table', attrs={'class':'tablehead'}):
-			irc.reply("Something broke heavily formatting on powerrankings page.")
-			return
-		# go about regular html business.
-		#datehead = soup.find('div', attrs={'class':'date floatleft'}).getText(separator=' ')
-		table = soup.find('table', attrs={'class':'tablehead'})
-		headline = table.find('tr', attrs={'class':'stathead'}).getText()
-		rows = table.findAll('tr', attrs={'class':re.compile('oddrow|evenrow')})
-		#self.log.info("rows {0}".format(rows))
-		# list for each team.
-		powerrankings = []
-		# each row is a team.
-		for row in rows: # one row per team.
-			tds = row.findAll('td') # findall tds.
-			if len(tds) == 1:  # this is so we skip the last row like "Others receiving votes".
-				continue
-			rank = tds[0].getText() # rank number.
-			team = tds[1].find('div', attrs={'style':'padding: 10px;'}).findAll('a')
-			team = team[1].getText().replace('&amp;', '&') # 2nd link text.
-			# we're here if we should process the good lines.
-			lastweek = tds[2].find('span', attrs={'class':'pr-last'})
-			if lastweek:
-				lastweek = lastweek.getText().replace('Last Week:', '').strip() # rank #
-				# check if we're up or down and insert a symbol.
-				if lastweek == "NR":
-					symbol = self._green('▲')
-				elif int(rank) < int(lastweek):  # specific to CFB.
-					symbol = self._green('▲')
-				elif int(rank) > int(lastweek):
-					symbol = self._red('▼')
-				else: # - if the same.
-					symbol = "-"
-				# now add.
-				powerrankings.append("{0}. {1} (prev: {2} {3})".format(rank, team, symbol, lastweek))
-			else:  # lastweek not found (preseason)
-				powerrankings.append("{0}. {1}".format(rank, team))
-		# now output. conditional if we have the team or not.
-		#irc.reply("{0} :: {1}".format(self._blue(headline), datehead))
-		irc.reply("{0}".format(self._blue(headline)))
-		for splice in self._splicegen('380', powerrankings):
-			irc.reply(" | ".join([powerrankings[item] for item in splice]))
-
-	cfbpowerrankings = wrap(cfbpowerrankings)
-
 	def cfbrankings(self, irc, msg, args, optpoll):
 		"""<ap|usatoday|bcs|<team>
 		If ap, usatoday or bcs are given, it will display this week's poll.
