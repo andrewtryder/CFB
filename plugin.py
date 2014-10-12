@@ -297,17 +297,6 @@ class CFB(callbacks.Plugin):
 	# PUBLIC FUNCTIONS #
 	####################
 
-	def cfbplayoffcountdown(self, irc, msg, args):
-		"""
-		Display the time until the next NFL season starts.
-		"""
-
-		dDelta = datetime.datetime(2015, 1, 1, 1, 0) - datetime.datetime.now()
-		irc.reply("There are {0} days {1} hours {2} minutes {3} seconds until the 2015 College Football Playoff.".format(\
-											dDelta.days, dDelta.seconds/60/60, dDelta.seconds/60%60, dDelta.seconds%60))
-
-	cfbplayoffcountdown = wrap(cfbplayoffcountdown)
-
 	def cfbcountdown(self, irc, msg, args):
 		"""
 		Display time until the next CFB Season.
