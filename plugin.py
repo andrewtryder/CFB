@@ -620,48 +620,6 @@ class CFB(callbacks.Plugin):
 
 	cfbinjury = wrap(cfbinjury, [('text')])
 
-	def cfbteaminfo(self, irc, msg, args, optteam):
-		"""<team>
-		Display basic info/stats on a team.
-		Ex: Alabama
-		"""
-
-		# lookup team.
-		lookupteam = self._lookupTeam(optteam, opttable='tid')
-		if isinstance(lookupteam, list):  # if match no good, list returned. give simmilar teams.
-			irc.reply("ERROR: I could not find team '{0}'. Similar: {1}".format(optteam, " | ".join(sorted([i['team'].title() for i in lookupteam]))))
-			return
-		# build and fetch url.
-		url = self._b64decode('aHR0cDovL3d3dy5jYnNzcG9ydHMuY29tL2NvbGxlZ2Vmb290YmFsbC90ZWFtcy9wYWdl') + '/%s/' % lookupteam
-		html = self._httpget(url)
-		if not html:
-			irc.reply("ERROR: Failed to fetch {0}.".format(url))
-			self.log.error("ERROR opening {0}".format(url))
-			return
-		# process html.
-		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
-		div = soup.find('div', attrs={'class':'pageTitle team'})
-		name = div.find('div', attrs={'class':'info'}).find('h1').getText(separator=' ')
-		record = div.find('div', attrs={'class':re.compile('^record')}).getText(separator=u' ')
-		table = div.find('div', attrs={'class':'stats'}).find('table', attrs={'class':'data'})
-		rows = table.findAll('tr')
-		# put each stat into a string.
-		rushingOff = rows[1].findAll('td')[1].getText()
-		rushingDef = rows[1].findAll('td')[2].getText()
-		passingOff = rows[2].findAll('td')[1].getText()
-		passingDef = rows[2].findAll('td')[2].getText()
-		overallOff = rows[3].findAll('td')[1].getText()
-		overallDef = rows[3].findAll('td')[2].getText()
-		# build output.
-		output = "{0} :: {1} - {2} o: {3} d: {4} | {5} o: {6} d: {7} | {8} o: {9} d: {10}".format(\
-			self._red(utils.str.normalizeWhitespace(name)), record, self._bold('Rushing:'), rushingOff,\
-			rushingDef, self._bold('Passing:'), passingOff, passingDef, self._bold('Overall:'), overallOff,\
-			overallDef)
-		# output.
-		irc.reply(output)
-
-	cfbteaminfo = wrap(cfbteaminfo, [('text')])
-
 	def cfbpolls(self, irc, msg, args, optpoll, optyear, optweek):
 		"""<AP|BCS> <year> <week #>
 		Display historical AP/BCS polls (Top 25)for a specific year and week.
