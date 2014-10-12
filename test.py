@@ -27,10 +27,16 @@ class CFBTestCase(PluginTestCase):
         self.assertNotError('cfbpolls ap')
         self.assertNotError('cfbpolls usatoday')
         # self.assertNotError('cfbroster Alabama')  # broken.
-        self.assertNotError('cfbschedule Alabama')
+        self.assertNotError('cfbschedule LSU')
         self.assertNotError('cfbstandings sec')
         self.assertNotError('cfbstats rushing')
         self.assertNotError('cfbstats points')
+        self.assertNotError('cfbteamleaders passing Alabama')
+        self.assertNotError('cfbteams SEC')
+        self.assertNotError('cfbteamstats int')
+        self.assertNotError('cfbteamstats sacks')
+        self.assertNotError('cfbweeklyleaders')
+        self.assertNotError('spurrier')
                             
         
         
