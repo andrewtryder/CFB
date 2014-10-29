@@ -297,6 +297,41 @@ class CFB(callbacks.Plugin):
 	# PUBLIC FUNCTIONS #
 	####################
 
+	def cfbplayoff(self, irc, msg, args):
+		"""
+		Display CFB Playoff Rankings.
+		"""
+		
+		url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvcmFua2luZ3MvXy9wb2xsLzIx')
+		html = self._httpget(url)
+		if not html:
+			irc.reply("ERROR: Failed to fetch {0}.".format(url))
+			self.log.error("ERROR opening {0}".format(url))
+			return
+		# process html.
+		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
+		# find the title
+		title = soup.find('h1', attrs={'class':'h2'})
+		# find the table.
+		table = soup.find('table', attrs={'class':'tablehead', 'cellspacing':'1', 'cellpadding':'3'})
+		if not table:
+			irc.reply("ERROR: I could not find the CFB Playoff table on: {0}".format(url))
+			return
+		# we did find lets go.
+		o = []  # output.
+		# iterate over rows in table.
+		rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*?|^evenrow.*?')})
+		for row in rows:
+			tds = row.findAll('td')
+			rank = tds[0].getText()
+			team = tds[1].find('a').getText().encode('utf-8')
+			o.append("{0}. {1}".format(rank, team))
+		# output.
+		irc.reply("{0} :: {1}".format(title.getText().encode('utf-8'), " | ".join([i for i in o])))
+	
+	cfbplayoff = wrap(cfbplayoff)
+		
+
 	def cfbcountdown(self, irc, msg, args):
 		"""
 		Display time until the next CFB Season.
