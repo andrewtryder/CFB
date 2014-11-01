@@ -297,41 +297,6 @@ class CFB(callbacks.Plugin):
 	# PUBLIC FUNCTIONS #
 	####################
 
-	def cfbplayoff(self, irc, msg, args):
-		"""
-		Display CFB Playoff Rankings.
-		"""
-		
-		url = self._b64decode('aHR0cDovL2VzcG4uZ28uY29tL2NvbGxlZ2UtZm9vdGJhbGwvcmFua2luZ3MvXy9wb2xsLzIx')
-		html = self._httpget(url)
-		if not html:
-			irc.reply("ERROR: Failed to fetch {0}.".format(url))
-			self.log.error("ERROR opening {0}".format(url))
-			return
-		# process html.
-		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
-		# find the title
-		title = soup.find('h1', attrs={'class':'h2'})
-		# find the table.
-		table = soup.find('table', attrs={'class':'tablehead', 'cellspacing':'1', 'cellpadding':'3'})
-		if not table:
-			irc.reply("ERROR: I could not find the CFB Playoff table on: {0}".format(url))
-			return
-		# we did find lets go.
-		o = []  # output.
-		# iterate over rows in table.
-		rows = table.findAll('tr', attrs={'class':re.compile('^oddrow.*?|^evenrow.*?')})
-		for row in rows:
-			tds = row.findAll('td')
-			rank = tds[0].getText()
-			team = tds[1].find('a').getText().encode('utf-8')
-			o.append("{0}. {1}".format(rank, team))
-		# output.
-		irc.reply("{0} :: {1}".format(title.getText().encode('utf-8'), " | ".join([i for i in o])))
-	
-	cfbplayoff = wrap(cfbplayoff)
-		
-
 	def cfbcountdown(self, irc, msg, args):
 		"""
 		Display time until the next CFB Season.
@@ -819,16 +784,16 @@ class CFB(callbacks.Plugin):
 	cfbweeklyleaders = wrap(cfbweeklyleaders)
 
 	def cfbrankings(self, irc, msg, args, optpoll):
-		"""<ap|usatoday|bcs|<team>
-		If ap, usatoday or bcs are given, it will display this week's poll.
+		"""<ap|usatoday|playoff|<team>
+		If ap, usatoday or playoff are given, it will display this week's poll.
 		If <team> is given, it will search each poll for that team and display.
-		Ex: bcs OR Alabama
+		Ex: ap OR Alabama
 		"""
 
 		# handle input.
 		optpoll, optinput = optpoll.lower(), False
 		# check poll. url conditional on the string.
-		if optpoll not in ['bcs', 'ap', 'usatoday']:  # check for ap|bcs|usatoday.
+		if optpoll not in ['playoff', 'ap', 'usatoday']:  # check for ap|bcs|usatoday.
 			optinput = optpoll  # change optpoll into optinput so we can search later.
 		# fetch url.
 		url = self._b64decode('aHR0cDovL3JpdmFscy55YWhvby5jb20vbmNhYS9mb290YmFsbC9wb2xscw==')
@@ -849,7 +814,7 @@ class CFB(callbacks.Plugin):
 			if ul:  # during the offseason, these won't be present in all polls.
 				poll = table.find('div', attrs={'class':'hd'})  # poll's name hidden in here. replace text below.
 				poll = poll.getText()  # replace text below to mate up keys.
-				poll = poll.replace('AP Top 25', 'ap').replace('USA Today', 'usatoday').replace('Bowl Champ. Series', 'bcs')
+				poll = poll.replace('AP Top 25', 'ap').replace('USA Today', 'usatoday').replace('CFB Selection Committee', 'playoff')
 				lis = ul.findAll('li')  # each li in table = teams.
 				for li in lis:  # enumerate through each team.
 					if li.find('span'):  # do some cleaning up. rank is contained in span.
