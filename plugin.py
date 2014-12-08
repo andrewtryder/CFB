@@ -1225,8 +1225,7 @@ class CFB(callbacks.Plugin):
         # each row is a game.
         for row in rows:
             tds = row.findAll('td')
-            # have to do this for bowls.
-            if len(tds) < 2:
+            if len(tds) < 2:  # have to do this for bowls.
                 continue
             date = tds[0].getText()
             opp = tds[1].getText().replace('&amp;', '&')  # aTm fix.
